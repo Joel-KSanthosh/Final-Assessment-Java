@@ -3,7 +3,7 @@
 
 ### API Methods
 
-1. **GET** /api/v1/employees/{product-id}/?starts-with={char}
+1. **GET** /api/v1/employees/{employee-id}/?starts-with={char}
     - query-param-required : false
     - response-status : 200
     - response : list of employee details as JSON
