@@ -57,6 +57,7 @@
         "name" : "Zoro",
         "stream" : "Sales",
         "designation" : "Manager",
+        "accountName" : "Smart ops",
         "managerId" : 0
    }
    ```
