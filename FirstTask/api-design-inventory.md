@@ -1,6 +1,8 @@
 # API Design Document
 ## Inventory Management System
 
+<img src="inventory.png" width="500"/>
+
 ### API Methods
 
 1. **POST** api/v1/category/add
