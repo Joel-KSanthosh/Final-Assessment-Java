@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+
 @Getter
 @Setter
 @Entity
@@ -15,7 +16,6 @@ import lombok.Setter;
 public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
- 
     Long id;//product id
     
     @NotBlank(message = "Name is mandatory")
