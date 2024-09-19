@@ -1,11 +1,9 @@
 package com.inventory.shopcart.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import jakarta.validation.constraints.NotBlank;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,15 +12,15 @@ import lombok.Setter;
 @Entity
 @Table(name="user")
 public class User{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;//product id
+    private Long id;
     
-    @NotBlank(message = "Name is mandatory")
-    String name;
+    @Column(name = "name",nullable = false)
+    private String name;
 
-    @NotBlank(message = "Role is mandatory")
-    String role;
-
+    @Column(name = "role",nullable = false)
+    private String role;
 
 }

@@ -127,7 +127,7 @@
    - query-param-required : true
    - response-status:200
    - response:
-    ```json
+   ```json
     {
         "message" : "product restocking successfully"
     }
