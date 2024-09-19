@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ShopcartExceptionHandler {
-
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Exception.class)
-    public CustomResponse handleGenericException(Exception ex){
-        return new CustomResponse(ex.getMessage());
-    }
+//
+//    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+//    @ExceptionHandler(Exception.class)
+//    public CustomResponse handleGenericException(Exception ex){
+//        return new CustomResponse(ex.getMessage());
+//    }
 }

@@ -1,6 +1,7 @@
 package com.inventory.shopcart.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -9,7 +10,10 @@ import java.util.List;
 @AllArgsConstructor
 public class CustomResponse {
 
+    @JsonProperty
     private String message;
+
+    @JsonProperty
     private List<?> details;
 
     public CustomResponse(String message){
