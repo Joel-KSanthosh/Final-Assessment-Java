@@ -22,6 +22,4 @@ public class ShopcartController {
     public CustomResponse insertProduct(@RequestBody ProductDTO productDTO){
         return null;
     }
-
-    
 }
