@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.domain.Persistable;
 
@@ -13,7 +14,7 @@ import java.util.Date;
 @Setter
 @Entity
 @Table(name="orders")
-public class Order implements Persistable<Long> {
+public class Orders {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,13 +29,8 @@ public class Order implements Persistable<Long> {
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
 
-    @CreatedDate
-    @Column(name = "order_date",updatable = false,nullable = false)
+    @Column(name = "order_date",updatable = false,nullable = false,columnDefinition = "timestamp default current_timestamp")
     private Date orderDate;
 
-    @Override
-    public boolean isNew() {
-        return orderDate == null;
-    }
 }
 

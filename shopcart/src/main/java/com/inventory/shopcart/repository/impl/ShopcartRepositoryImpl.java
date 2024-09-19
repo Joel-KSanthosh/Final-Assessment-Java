@@ -3,9 +3,12 @@ package com.inventory.shopcart.repository.impl;
 import com.inventory.shopcart.dto.CategoryDTO;
 import com.inventory.shopcart.dto.CategoryDetails;
 import com.inventory.shopcart.dto.ProductDTO;
+import com.inventory.shopcart.dto.ProductGET;
 import com.inventory.shopcart.repository.ShopcartRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -95,5 +98,52 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
             }
         });
         return new ArrayList<>(categoryMap.values());
+    }
+
+    @Override
+    public ProductGET findProductById(Long id) {
+        String query = "SELECT * FROM product WHERE id = ?";
+        try {
+            return jdbcTemplate.queryForObject(query, new RowMapper<ProductGET>() {
+                @Override
+                public ProductGET mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    ProductGET product = new ProductGET();
+                    product.setId(id);
+                    product.setName(rs.getString("name"));
+                    product.setPrice(rs.getFloat("price"));
+                    product.setQuantity(rs.getLong("quantity"));
+                    product.setCategoryId(rs.getLong("category_id"));
+                    return product;
+                }
+            },id);
+        }
+        catch (EmptyResultDataAccessException ex){
+            throw new EmptyResultDataAccessException("Product with given id doesn't exist!",1);
+        }
+    }
+
+    @Override
+    public void buyProduct(ProductGET product, int quantity) {
+        if(product.getQuantity()>=quantity){
+            String query = "UPDATE product SET quantity = quantity - ? WHERE id = ?";
+            jdbcTemplate.update(query, quantity, product.getId());
+        }
+        else {
+            throw new DataIntegrityViolationException("Unable to process order to limited stock." +
+                    " Item left = "+product.getQuantity());
+        }
+    }
+
+    @Override
+    public void createOrder(Long productId, Long userId) {
+        String query = "INSERT INTO Orders(product_id,user_id) VALUES(?,?)";
+        jdbcTemplate.update(query,productId,userId);
+    }
+
+    @Override
+    public boolean existsBuyerWithId(Long id) {
+        String query = "SELECT COUNT(*) FROM user WHERE id = ? AND role = 'buyer'";
+        Long count = jdbcTemplate.queryForObject(query, Long.class,id);
+        return count != null && count > 0;
     }
 }

@@ -10,5 +10,5 @@ public interface ShopcartService {
     public void insertCategory(CategoryDTO categoryDTO);
     public CategoryDetails findCategoryDetailsById(Long id);
     public List<CategoryDetails> findAllCategoryDetails();
-
+    public void orderProduct(Long productId,Long userId,int quantity);
 }

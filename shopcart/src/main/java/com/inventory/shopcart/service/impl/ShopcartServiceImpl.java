@@ -2,10 +2,12 @@ package com.inventory.shopcart.service.impl;
 
 import com.inventory.shopcart.dto.CategoryDTO;
 import com.inventory.shopcart.dto.CategoryDetails;
+import com.inventory.shopcart.dto.ProductGET;
 import com.inventory.shopcart.repository.ShopcartRepository;
 import com.inventory.shopcart.service.ShopcartService;
 
 import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +39,19 @@ public class ShopcartServiceImpl implements ShopcartService {
     @Override
     public List<CategoryDetails> findAllCategoryDetails() {
         return shopcartRepository.findAllCategoryDetails();
+    }
+
+    @Override
+    @Transactional
+    public void orderProduct(Long productId, Long userId, int quantity) {
+        if(shopcartRepository.existsBuyerWithId(userId)){
+            ProductGET product = shopcartRepository.findProductById(productId);
+            shopcartRepository.buyProduct(product,quantity);
+            shopcartRepository.createOrder(productId,userId);
+        }
+        else {
+            throw new NoResultException("Buyer with given id doesn't exist!");
+        }
     }
 
 }

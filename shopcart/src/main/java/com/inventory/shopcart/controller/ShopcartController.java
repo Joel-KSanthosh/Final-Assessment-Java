@@ -6,6 +6,7 @@ import com.inventory.shopcart.dto.CustomResponse;
 import com.inventory.shopcart.dto.ProductDTO;
 
 import com.inventory.shopcart.service.ShopcartService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +22,12 @@ public class ShopcartController {
     }
 
     @PostMapping("category/add")
-    public void insertCategory(@RequestBody CategoryDTO categoryDTO){
+    public void insertCategory(@Valid @RequestBody CategoryDTO categoryDTO){
         System.out.println(categoryDTO);
     }
 
     @PostMapping("product/add")
-    public CustomResponse insertProduct(@RequestBody ProductDTO productDTO){
+    public CustomResponse insertProduct(@Valid @RequestBody ProductDTO productDTO){
         return null;
     }
 
@@ -39,5 +40,15 @@ public class ShopcartController {
             CategoryDetails categoryDetails = shopcartService.findCategoryDetailsById(id);
             return new CustomResponse("Successfully Fetched", List.of(categoryDetails));
         }
+    }
+
+    @PutMapping("product/{id}/order")
+    public CustomResponse orderProduct(
+            @PathVariable Long id,
+            @RequestParam Long userId,
+            @RequestParam int quantity
+    ){
+        shopcartService.orderProduct(id,userId,quantity);
+        return new CustomResponse("Order placed Successfully.");
     }
 }
