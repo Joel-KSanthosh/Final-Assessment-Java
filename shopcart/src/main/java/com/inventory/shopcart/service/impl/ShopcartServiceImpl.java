@@ -8,6 +8,8 @@ import com.inventory.shopcart.service.ShopcartService;
 import jakarta.persistence.NoResultException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ShopcartServiceImpl implements ShopcartService {
 
@@ -30,6 +32,11 @@ public class ShopcartServiceImpl implements ShopcartService {
         else {
             throw new NoResultException("Category with given id doesn't exist!");
         }
+    }
+
+    @Override
+    public List<CategoryDetails> findAllCategoryDetails() {
+        return shopcartRepository.findAllCategoryDetails();
     }
 
 }
