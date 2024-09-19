@@ -2,7 +2,6 @@ package com.inventory.shopcart.model;
 
 import jakarta.persistence.*;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,7 +12,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-@Table(name="order")
+@Table(name="orders")
 public class Order implements Persistable<Long> {
 
     @Id
@@ -27,7 +26,7 @@ public class Order implements Persistable<Long> {
 
     @ManyToOne
     @JoinColumn(name = "user_id",nullable = false)
-    private Long user;
+    private User user;
 
     @CreatedDate
     @Column(name = "order_date",updatable = false,nullable = false)

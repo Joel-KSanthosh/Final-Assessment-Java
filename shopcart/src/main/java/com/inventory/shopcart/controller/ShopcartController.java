@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ShopcartController {
 
     @PostMapping("category/add")
-    public CustomResponse insertCategory(@RequestBody CategoryDTO categoryDTO){
-        return null;
+    public void insertCategory(@RequestBody CategoryDTO categoryDTO){
+        System.out.println(categoryDTO);
     }
+   
+   
 
     @PostMapping("product/add")
     public CustomResponse insertProduct(@RequestBody ProductDTO productDTO){
