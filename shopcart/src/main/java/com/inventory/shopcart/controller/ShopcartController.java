@@ -30,9 +30,14 @@ public class ShopcartController {
         return null;
     }
 
-    @GetMapping("category/{id}")
-    public CustomResponse getCategory(@PathVariable Long id){
-        CategoryDetails categoryDetails = shopcartService.findCategoryDetailsById(id);
-        return new CustomResponse("Successfully Fetched", List.of(categoryDetails));
+    @GetMapping(path = {"category","category/{id}"})
+    public CustomResponse getCategory(@PathVariable(required = false) Long id){
+        if(id == null){
+            return new CustomResponse("Successfully Fetched",shopcartService.findAllCategoryDetails());
+        }
+        else {
+            CategoryDetails categoryDetails = shopcartService.findCategoryDetailsById(id);
+            return new CustomResponse("Successfully Fetched", List.of(categoryDetails));
+        }
     }
 }
