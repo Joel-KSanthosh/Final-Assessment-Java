@@ -20,6 +20,8 @@ public class Product {
     
     @NotBlank(message = "Name is mandatory")
     String name;
+
+    
     @NotEmpty(message = "category id  is mandatory")
     Long category_id;
     
