@@ -27,7 +27,7 @@ public class Order implements Persistable<Long> {
 
     @ManyToOne
     @JoinColumn(name = "user_id",nullable = false)
-    private Long user;
+    private User user;
 
     @CreatedDate
     @Column(name = "order_date",updatable = false,nullable = false)
