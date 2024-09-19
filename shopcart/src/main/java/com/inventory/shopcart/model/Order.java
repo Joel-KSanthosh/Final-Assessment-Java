@@ -1,28 +1,41 @@
 package com.inventory.shopcart.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-// import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.persistence.*;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.domain.Persistable;
+
+import java.util.Date;
 
 @Getter
 @Setter
 @Entity
 @Table(name="order")
-public class Order{
+public class Order implements Persistable<Long> {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    
-    @NotEmpty(message = "product id is mandatory")
-    Long Product_id;
-    @NotEmpty(message = "user id  is mandatory")
-    Long user_id;
+    @Column(name = "id")
+    private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "product_id",nullable = false)
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id",nullable = false)
+    private Long user;
+
+    @CreatedDate
+    @Column(name = "order_date",updatable = false,nullable = false)
+    private Date orderDate;
+
+    @Override
+    public boolean isNew() {
+        return orderDate == null;
+    }
 }
 

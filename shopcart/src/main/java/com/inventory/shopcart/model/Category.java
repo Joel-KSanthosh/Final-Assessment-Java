@@ -1,5 +1,6 @@
 package com.inventory.shopcart.model;
 
+import jakarta.persistence.Column;
 // import org.springframework.data.annotation.Id;
 import jakarta.persistence.Entity;
 // import jakarta.persistence.CascadeType;
@@ -10,6 +11,7 @@ import jakarta.persistence.Id;
 // import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,11 +22,10 @@ import lombok.Setter;
 public class Category{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;//category_id
+    @Column(name = "id")
+    private Long id;
 
-    @NotBlank(message = "Name is mandatory")
-    String name;
-    
-
+    @Column(name = "name",nullable = false)
+    private String name;
 
 }

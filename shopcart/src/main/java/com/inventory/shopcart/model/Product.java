@@ -1,11 +1,9 @@
 package com.inventory.shopcart.model;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,15 +12,21 @@ import lombok.Setter;
 @Entity
 @Table(name="product")
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;//product id
-    
-    @NotBlank(message = "Name is mandatory")
-    String name;
+    private Long id;
 
-    
-    @NotEmpty(message = "category id  is mandatory")
-    Long category_id;
-    
+    @Column(name = "name",nullable = false)
+    private String name;
+
+    @Column(name = "price",nullable = false)
+    private float price;
+
+    @Column(name = "quantity",nullable = false)
+    private long quantity;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id",nullable = false)
+    private Category category;
 }
