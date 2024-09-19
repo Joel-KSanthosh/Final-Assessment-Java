@@ -17,11 +17,11 @@ public class ShopcartController {
     public void insertCategory(@RequestBody CategoryDTO categoryDTO){
         System.out.println(categoryDTO);
     }
-   
-   
 
     @PostMapping("product/add")
     public CustomResponse insertProduct(@RequestBody ProductDTO productDTO){
         return null;
     }
+
+    
 }
