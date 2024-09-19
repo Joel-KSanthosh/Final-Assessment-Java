@@ -2,6 +2,7 @@ package com.inventory.shopcart.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 
 import jakarta.validation.constraints.NotNull;
@@ -16,7 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CategoryDTO {
     @JsonProperty
-    @NotNull(message = "ERROR")
+    @NotBlank(message = "ERROR")
     private String categoryName;
 
     
