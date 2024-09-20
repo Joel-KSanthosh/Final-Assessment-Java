@@ -32,8 +32,12 @@ public class ShopcartServiceImpl implements ShopcartService {
 
    @Override
     public String insertProduct(ProductDTO productDTO){
-
-       return shopcartRepository.insertProduct(productDTO);
+        if(shopcartRepository.existsCategoryById(productDTO.getCategory_Id())){
+            return shopcartRepository.insertProduct(productDTO);
+        }
+        else{
+             throw new NoResultException("Category with given id doesn't exist!");
+        }
     }
 
     @Override

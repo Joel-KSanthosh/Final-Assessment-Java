@@ -54,7 +54,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     @Override
     public void deleteCategory(Long categoryId) {
 
-        String query="DELETE  FROM Category where id = ?";
+        String query="DELETE FROM Category where id = ?";
         jdbcTemplate.update(query,categoryId);
     }
 
