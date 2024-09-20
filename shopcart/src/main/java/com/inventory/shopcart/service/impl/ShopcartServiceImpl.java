@@ -25,8 +25,8 @@ public class ShopcartServiceImpl implements ShopcartService {
     }
 
     @Override
+    @Transactional
     public String insertCategory(CategoryDTO categoryDTO) {
-        System.out.println("entering service of insert category");
        return shopcartRepository.insertCategory(categoryDTO);
     }
 

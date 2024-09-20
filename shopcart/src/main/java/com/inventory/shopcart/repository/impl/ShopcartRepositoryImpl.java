@@ -8,8 +8,10 @@ import com.inventory.shopcart.model.Category;
 import com.inventory.shopcart.model.Product;
 import com.inventory.shopcart.repository.ShopcartRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,44 +19,87 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class ShopcartRepositoryImpl implements ShopcartRepository {
 
-    @Autowired
     private final JdbcTemplate jdbcTemplate;
+
+    private Map<Long,String> categoryCache;
+    private Map<Long,String> productCache;
+    private Long maxCategoryKey;
+    private Long maxProductKey;
 
     public ShopcartRepositoryImpl(JdbcTemplate jdbcTemplate){
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @PostConstruct
+    public void init(){
+        String productNameQuery = "SELECT id,name FROM product";
+        String categoryNameQuery = "SELECT id,name FROM category";
+
+        categoryCache = new HashMap<>();
+        productCache = new HashMap<>();
+
+        try {
+                jdbcTemplate.query(categoryNameQuery, new RowMapper<Void>() {
+                    @Override
+                    public Void mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        categoryCache.put(rs.getLong("id"), rs.getString("name"));
+                        return null;
+                    }
+                });
+
+                jdbcTemplate.query(productNameQuery, new RowMapper<Void>() {
+                    @Override
+                    public Void mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        productCache.put(rs.getLong("id"),rs.getString("name") );
+                        return null;
+                    }
+                });
+        }
+        catch (EmptyResultDataAccessException ex){
+            System.out.println("No data");
+        }
+
+        maxCategoryKey = categoryCache.keySet().stream().max(Long::compare).orElse(1L);
+        maxProductKey = productCache.keySet().stream().max(Long::compare).orElse(1L);
+    }
+
     @Override
     public String insertCategory(CategoryDTO categoryDTO){
-
         String query = "INSERT INTO Category(name) VALUES(?)";
+
+        if(categoryCache.containsValue(categoryDTO.getCategoryName())){
+            throw new DuplicateKeyException("Category with name "+categoryDTO.getCategoryName()+" already exists!");
+        }
+
         jdbcTemplate.update(query,categoryDTO.getCategoryName());
+        maxCategoryKey += 1;
+        categoryCache.put(maxCategoryKey,categoryDTO.getCategoryName());
         return categoryDTO.getCategoryName();
     }
 
     @Override
-    public String  insertProduct(ProductDTO productDTO) {
-        System.out.println( productDTO.getProductName());
-
+    public String insertProduct(ProductDTO productDTO) {
         String query="INSERT INTO Product(name,price,quantity,category_id) VALUES(?,?,?,?)";
+
+        if(productCache.containsValue(productDTO.getProductName())){
+            throw new DuplicateKeyException("Product with name "+productDTO.getProductName()+" already exists!");
+        }
         jdbcTemplate.update(query,productDTO.getProductName(),
                 productDTO.getPrice(),productDTO.getQuantity(),
                 productDTO.getCategory_Id());
+        maxProductKey += 1;
+        productCache.put(maxProductKey,productDTO.getProductName());
         return productDTO.getProductName();
     }
 
     @Override
     public void deleteCategory(Long categoryId) {
-
-        String query="DELETE FROM Category where id = ?";
+        String query="DELETE  FROM Category where id = ?";
         jdbcTemplate.update(query,categoryId);
     }
 
@@ -70,10 +115,8 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         String productSql = "SELECT * FROM product WHERE id = ?";
         String categorySql = "SELECT id, name FROM category WHERE id = ?";
 
-        // Fetching product by ID
         Product product = jdbcTemplate.queryForObject(productSql, new Object[]{id}, this::mapProduct);
 
-        // Fetching associated category
         if (product != null) {
 
             Category category = jdbcTemplate.queryForObject(categorySql, new Object[]{product.getCategory().getId()}, this::mapCategory);
@@ -108,7 +151,6 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         product.setPrice(rs.getFloat("price"));
         product.setQuantity(rs.getLong("quantity"));
 
-        // Assuming `category_id` exists in the product table
         Long categoryId = rs.getLong("category_id");
         Category category = new Category();
         category.setId(categoryId);
@@ -139,9 +181,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public boolean existsCategoryById(Long id) {
-        String query = "SELECT COUNT(*) FROM category WHERE id = ?";
-        Long count = jdbcTemplate.queryForObject(query,Long.class,id);
-        return count!=null && count > 0;
+        return categoryCache.containsKey(id);
     }
 
     @Override
@@ -226,9 +266,8 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     }
 
     public boolean existsProductWithId(Long productId){
-        String sql="SELECT COUNT(*) FROM product WHERE id = ? ";
-        Integer count=jdbcTemplate.queryForObject(sql,Integer.class,productId);
-        return count!=null && count>0;}
+        return productCache.containsKey(productId);
+    }
 
     public boolean existsCategoryHasProductWithId(Long categoryId){
         String sql="SELECT COUNT(*) FROM product WHERE category_id = ?";
