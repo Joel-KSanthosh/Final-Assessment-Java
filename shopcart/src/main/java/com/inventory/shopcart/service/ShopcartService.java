@@ -4,11 +4,19 @@ import com.inventory.shopcart.dto.CategoryDTO;
 import com.inventory.shopcart.dto.CategoryDetails;
 
 import java.util.List;
+import com.inventory.shopcart.dto.ProductDTO;
 
 public interface ShopcartService {
+    void deleteProduct(Long id);
+    void orderProduct(Long productId,Long userId,int quantity);
+    void deleteCategory(Long id);
 
-    public void insertCategory(CategoryDTO categoryDTO);
-    public CategoryDetails findCategoryDetailsById(Long id);
-    public List<CategoryDetails> findAllCategoryDetails();
-    public void orderProduct(Long productId,Long userId,int quantity);
+    String insertCategory(CategoryDTO categoryDTO);
+    String insertProduct(ProductDTO productDTO);
+
+    Object getProducts(Long id);
+
+    CategoryDetails findCategoryDetailsById(Long id);
+
+    List<CategoryDetails> findAllCategoryDetails();
 }

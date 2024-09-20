@@ -5,8 +5,9 @@ import com.inventory.shopcart.dto.CustomResponse;
 import jakarta.persistence.NoResultException;
 
 import org.springframework.dao.DataIntegrityViolationException;
-
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+
 import org.springframework.http.HttpStatus;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -68,6 +69,12 @@ public class ShopcartExceptionHandler {
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(NullPointerException.class)
     public CustomResponse handleNullPointerException(Exception ex){
+        return new CustomResponse(ex.getMessage());
+    }
+
+    @ResponseStatus(code = HttpStatus.CONFLICT)
+    @ExceptionHandler(DuplicateKeyException.class)
+    public CustomResponse handleDuplicateKeyException(DuplicateKeyException ex){
         return new CustomResponse(ex.getMessage());
     }
 
