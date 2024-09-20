@@ -11,6 +11,7 @@ import com.inventory.shopcart.service.ShopcartService;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,18 +27,31 @@ public class ShopcartServiceImpl implements ShopcartService {
 
     @Override
     public String insertCategory(CategoryDTO categoryDTO) {
-        System.out.println("entering service of insert category");
+        if(shopcartRepository.existsCategoryWithName(categoryDTO.getCategoryName())){
+            throw new DuplicateKeyException("Category with name "+categoryDTO.getCategoryName()+" already exists!");
+        }
        return shopcartRepository.insertCategory(categoryDTO);
     }
 
    @Override
     public String insertProduct(ProductDTO productDTO){
         if(shopcartRepository.existsCategoryById(productDTO.getCategory_Id())){
+            if(shopcartRepository.existsProductWithName(productDTO.getProductName())){
+                throw new DuplicateKeyException("Product with name "+productDTO.getProductName()+" already exists!");
+            }
             return shopcartRepository.insertProduct(productDTO);
         }
         else{
              throw new NoResultException("Category with given id doesn't exist!");
         }
+    }
+
+    @Override
+    public String restockProduct(Long id, int quantity) {
+        if(shopcartRepository.existsProductWithId(id)){
+            return shopcartRepository.restockProduct(id,quantity);
+        }
+        throw new NoResultException("Product with given id doesn't exist!");
     }
 
     @Override
@@ -98,6 +112,17 @@ public class ShopcartServiceImpl implements ShopcartService {
         else {
             throw new NoResultException("Buyer with given id doesn't exist!");
         }
+    }
+
+    @Override
+    public List<String> updateCategory(Long id,String name){
+        if(shopcartRepository.existsCategoryById(id)){
+            if (shopcartRepository.existsCategoryWithName(name)){
+                throw new DuplicateKeyException("Category with name "+name+" already exists!");
+            }
+            return shopcartRepository.updateCategory(id,name);
+        }
+        throw new NoResultException("Category with given id doesn't exist!");
     }
 
 }

@@ -13,10 +13,12 @@ public interface ShopcartService {
 
     String insertCategory(CategoryDTO categoryDTO);
     String insertProduct(ProductDTO productDTO);
+    String restockProduct(Long id,int quantity);
 
     Object getProducts(Long id);
 
     CategoryDetails findCategoryDetailsById(Long id);
 
+    List<String> updateCategory(Long id,String name);
     List<CategoryDetails> findAllCategoryDetails();
 }

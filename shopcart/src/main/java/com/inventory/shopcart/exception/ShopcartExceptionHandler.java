@@ -10,6 +10,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 
 import org.springframework.http.HttpStatus;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -82,6 +83,12 @@ public class ShopcartExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public CustomResponse handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex){
         return new CustomResponse("Enter a valid input for "+ ex.getName());
+    }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public CustomResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException ex){
+        return new CustomResponse("Request Body is invalid");
     }
 
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
