@@ -9,6 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProductDTO {
+
     @JsonProperty
     @NotBlank(message = "product name is mandatory")
     private String productName;
@@ -24,6 +25,5 @@ public class ProductDTO {
     @JsonProperty
     @NotNull(message="category_Id is mandatory")
     private Long category_Id;
-    // private 
-    
+
 }

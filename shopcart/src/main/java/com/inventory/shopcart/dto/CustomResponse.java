@@ -10,15 +10,15 @@ import java.util.List;
 @AllArgsConstructor
 
 public class CustomResponse {
+
     @JsonProperty
     private String message;
+
     @JsonProperty
     private List<?> details;
 
     public CustomResponse(String message){
         this.message = message;
     }
-
-
 
 }

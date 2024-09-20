@@ -1,25 +1,25 @@
 package com.inventory.shopcart.controller;
 
 import com.inventory.shopcart.dto.CategoryDTO;
+import com.inventory.shopcart.dto.CategoryDetails;
 import com.inventory.shopcart.dto.CustomResponse;
 import com.inventory.shopcart.dto.ProductDTO;
 
 import com.inventory.shopcart.service.ShopcartService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1")
 public class ShopcartController {
-    private ShopcartService shopcartService;
 
+    private final ShopcartService shopcartService;
 
-   @Autowired
-    public ShopcartController(ShopcartService shopcartService) {
+    public ShopcartController(ShopcartService shopcartService){
         this.shopcartService = shopcartService;
     }
+
     @PostMapping("category/add")
     public CustomResponse insertCategory(@RequestBody CategoryDTO categoryDTO){
         System.out.println("entering contoller");
@@ -31,6 +31,17 @@ public class ShopcartController {
     public CustomResponse insertProduct(@RequestBody ProductDTO productDTO){
         String insertedProductName = shopcartService.insertProduct(productDTO);
         return new CustomResponse("Successfully Inserted Product"+insertedProductName);
+    }
+
+    @GetMapping(path = {"category","category/{id}"})
+    public CustomResponse getCategory(@PathVariable(required = false) Long id){
+        if(id == null){
+            return new CustomResponse("Successfully Fetched",shopcartService.findAllCategoryDetails());
+        }
+        else {
+            CategoryDetails categoryDetails = shopcartService.findCategoryDetailsById(id);
+            return new CustomResponse("Successfully Fetched", List.of(categoryDetails));
+        }
     }
 
     @GetMapping(path = {"products" ,"products/{id}"})
