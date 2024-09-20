@@ -4,8 +4,9 @@ import com.inventory.shopcart.dto.CategoryDTO;
 import com.inventory.shopcart.dto.CategoryDetails;
 import com.inventory.shopcart.dto.CustomResponse;
 import com.inventory.shopcart.dto.ProductDTO;
-
 import com.inventory.shopcart.service.ShopcartService;
+
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,16 +22,15 @@ public class ShopcartController {
     }
 
     @PostMapping("category/add")
-    public CustomResponse insertCategory(@RequestBody CategoryDTO categoryDTO){
-        System.out.println("entering contoller");
+    public CustomResponse insertCategory(@Valid @RequestBody CategoryDTO categoryDTO){
         String insertedCategoryName = shopcartService.insertCategory(categoryDTO);
-        return new CustomResponse("Successfully Inserted Category "+insertedCategoryName);
+        return new CustomResponse("Successfully Inserted Category : "+insertedCategoryName);
     }
 
     @PostMapping("product/add")
-    public CustomResponse insertProduct(@RequestBody ProductDTO productDTO){
+    public CustomResponse insertProduct(@Valid @RequestBody ProductDTO productDTO){
         String insertedProductName = shopcartService.insertProduct(productDTO);
-        return new CustomResponse("Successfully Inserted Product"+insertedProductName);
+        return new CustomResponse("Successfully Inserted Product : "+insertedProductName);
     }
 
     @GetMapping(path = {"category","category/{id}"})
@@ -71,8 +71,13 @@ public class ShopcartController {
 
     }
 
-
-
-
-
+    @PutMapping("product/{id}/order")
+    public CustomResponse orderProduct(
+            @PathVariable Long id,
+            @RequestParam Long userId,
+            @RequestParam int quantity
+    ){
+        shopcartService.orderProduct(id,userId,quantity);
+        return new CustomResponse("Order placed Successfully.");
+    }
 }

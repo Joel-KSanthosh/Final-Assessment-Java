@@ -3,24 +3,31 @@ package com.inventory.shopcart.repository;
 import com.inventory.shopcart.dto.CategoryDTO;
 import com.inventory.shopcart.dto.CategoryDetails;
 import com.inventory.shopcart.dto.ProductDTO;
-import com.inventory.shopcart.model.Product;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import com.inventory.shopcart.dto.ProductGET;
 
-import java.util.List;
 
 public interface ShopcartRepository {
 
-    public String insertCategory(CategoryDTO categoryDTO);
-    public String insertProduct(ProductDTO productDTO);
-    public void deleteCategory(Long categoryId);
-    public void deleteProduct(Long productId);
-    public Object getProductById( Long id);
+    void deleteCategory(Long categoryId);
+    void deleteProduct(Long productId);
+    void buyProduct(ProductGET product, int quantity);
+    void createOrder(Long productId, Long userId);
 
-    public Object getAllProducts();
-    public CategoryDetails findCategoryDetailsById(Long id);
-    public boolean existsCategoryById(Long id);
-    public List<CategoryDetails> findAllCategoryDetails();
+    boolean existsCategoryHasProductWithId(Long categoryId);
+    boolean existsCategoryById(Long id);
+    boolean existsProductWithId(Long productId);
+    boolean existsBuyerWithId(Long id);
 
+    String insertCategory(CategoryDTO categoryDTO);
+    String insertProduct(ProductDTO productDTO);
+
+    Object getProductById( Long id);
+    Object getAllProducts();
+
+    CategoryDetails findCategoryDetailsById(Long id);
+    ProductGET findProductById(Long id);
+
+    List<CategoryDetails> findAllCategoryDetails();
 }

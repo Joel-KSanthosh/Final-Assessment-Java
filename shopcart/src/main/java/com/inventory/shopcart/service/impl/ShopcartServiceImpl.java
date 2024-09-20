@@ -1,15 +1,17 @@
 package com.inventory.shopcart.service.impl;
 
 import com.inventory.shopcart.dto.CategoryDTO;
+import com.inventory.shopcart.dto.CategoryDetails;
+import com.inventory.shopcart.dto.ProductGET;
 import com.inventory.shopcart.dto.ProductDTO;
 import com.inventory.shopcart.repository.ShopcartRepository;
 
-import com.inventory.shopcart.dto.CategoryDetails;
 import com.inventory.shopcart.service.ShopcartService;
 
-import org.springframework.stereotype.Service;
-
 import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -44,29 +46,25 @@ public class ShopcartServiceImpl implements ShopcartService {
 
     }
 
-
     @Override
     public void deleteCategory(Long id){
-        if(shopcartRepository.iscategoryPresent(id)) {
-            System.out.println("chk is categoryPresent"+shopcartRepositoryImpl.iscategoryPresent(id));
-            if (!shopcartRepository.isCategoryIdHasProduct(id)) {
-             System.out.println("chk it has products"+!shopcartRepositoryImpl.isCategoryIdHasProduct(id))   ;
+        if(shopcartRepository.existsCategoryById(id)) {
+            if (!shopcartRepository.existsCategoryHasProductWithId(id)) {
                 shopcartRepository.deleteCategory(id);
             } else {
-                System.out.println("Category Id has products ,so It cant be deleted");
+                throw new DataIntegrityViolationException("Product exists in the given category!");
             }
         }else{
-            System.out.println("There is no category id"+id);
+            throw new NoResultException("Category with given id doesn't exist!");
         }
     }
 
     @Override
     public void deleteProduct(Long id) {
-     if(shopcartRepository.isProductPresent(id)){
+     if(shopcartRepository.existsProductWithId(id)){
          shopcartRepository.deleteProduct(id);
-         System.out.println("Product id is deleted");
      }else{
-         System.out.println("Product Id doesn't exists");
+         throw new NoResultException("Product with given id doesn't exist!");
      }
     }
 
@@ -83,6 +81,19 @@ public class ShopcartServiceImpl implements ShopcartService {
     @Override
     public List<CategoryDetails> findAllCategoryDetails() {
         return shopcartRepository.findAllCategoryDetails();
+    }
+
+    @Override
+    @Transactional
+    public void orderProduct(Long productId, Long userId, int quantity) {
+        if(shopcartRepository.existsBuyerWithId(userId)){
+            ProductGET product = shopcartRepository.findProductById(productId);
+            shopcartRepository.buyProduct(product,quantity);
+            shopcartRepository.createOrder(productId,userId);
+        }
+        else {
+            throw new NoResultException("Buyer with given id doesn't exist!");
+        }
     }
 
 }
