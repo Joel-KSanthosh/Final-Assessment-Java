@@ -19,10 +19,13 @@ public interface ShopcartRepository {
     boolean existsCategoryById(Long id);
     boolean existsProductWithId(Long productId);
     boolean existsBuyerWithId(Long id);
+    boolean existsProductWithName(String name);
+    boolean existsCategoryWithName(String name);
 
     String insertCategory(CategoryDTO categoryDTO);
     String insertProduct(ProductDTO productDTO);
-
+    String findCategoryNameWithId(Long id);
+    String findProductNameWithId(Long id);
     Object getProductById( Long id);
     Object getAllProducts();
 
@@ -30,4 +33,6 @@ public interface ShopcartRepository {
     ProductGET findProductById(Long id);
 
     List<CategoryDetails> findAllCategoryDetails();
+    List<String> updateCategory(Long id,String name);
+    String restockProduct(Long id,int quantity);
 }

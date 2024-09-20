@@ -11,7 +11,6 @@ import com.inventory.shopcart.repository.ShopcartRepository;
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -72,10 +71,6 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     public String insertCategory(CategoryDTO categoryDTO){
         String query = "INSERT INTO Category(name) VALUES(?)";
 
-        if(categoryCache.containsValue(categoryDTO.getCategoryName())){
-            throw new DuplicateKeyException("Category with name "+categoryDTO.getCategoryName()+" already exists!");
-        }
-
         jdbcTemplate.update(query,categoryDTO.getCategoryName());
         maxCategoryKey += 1;
         categoryCache.put(maxCategoryKey,categoryDTO.getCategoryName());
@@ -86,15 +81,22 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     public String insertProduct(ProductDTO productDTO) {
         String query="INSERT INTO Product(name,price,quantity,category_id) VALUES(?,?,?,?)";
 
-        if(productCache.containsValue(productDTO.getProductName())){
-            throw new DuplicateKeyException("Product with name "+productDTO.getProductName()+" already exists!");
-        }
         jdbcTemplate.update(query,productDTO.getProductName(),
                 productDTO.getPrice(),productDTO.getQuantity(),
                 productDTO.getCategory_Id());
         maxProductKey += 1;
         productCache.put(maxProductKey,productDTO.getProductName());
         return productDTO.getProductName();
+    }
+
+    @Override
+    public String findCategoryNameWithId(Long id) {
+        return categoryCache.get(id);
+    }
+
+    @Override
+    public String findProductNameWithId(Long id) {
+        return productCache.get(id);
     }
 
     @Override
@@ -205,11 +207,30 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
                     products = new ArrayList<>();
                     categoryDetails.setProducts(products);
                 }
-                products.add(rs.getString("product_name"));
+                if (rs.getString("product_name") != null) {
+                    products.add(rs.getString("product_name"));
+                }
                 return categoryDetails;
             }
         });
         return new ArrayList<>(categoryMap.values());
+    }
+
+    @Override
+    public List<String> updateCategory(Long id, String name) {
+        String prevCategoryName = findCategoryNameWithId(id);
+
+        String query = "UPDATE category SET name = ? WHERE id = ?";
+        jdbcTemplate.update(query,name,id);
+        categoryCache.replace(id,name);
+        return List.of(prevCategoryName,name);
+    }
+
+    @Override
+    public String restockProduct(Long id, int quantity) {
+        String query = "UPDATE product SET quantity = quantity + ? WHERE id = ?";
+        jdbcTemplate.update(query,quantity,id);
+        return findProductNameWithId(id);
     }
 
     @Override
@@ -273,6 +294,16 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         String sql="SELECT COUNT(*) FROM product WHERE category_id = ?";
         Integer count=jdbcTemplate.queryForObject(sql,Integer.class,categoryId);
         return count!=null && count>0;
+    }
+
+    @Override
+    public boolean existsCategoryWithName(String name){
+        return categoryCache.containsValue(name);
+    }
+
+    @Override
+    public boolean existsProductWithName(String name){
+        return productCache.containsValue(name);
     }
 
 }

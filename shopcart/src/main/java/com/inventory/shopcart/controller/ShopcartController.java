@@ -80,4 +80,19 @@ public class ShopcartController {
         shopcartService.orderProduct(id,userId,quantity);
         return new CustomResponse("Order placed Successfully.");
     }
+
+    @PutMapping("category/{id}/update")
+    public CustomResponse updateCategoryDetails(@PathVariable Long id, @RequestParam String name){
+        List<String> names = shopcartService.updateCategory(id,name);
+        return new CustomResponse("Category name has been changed from "+names.get(0)+" to "+names.get(1));
+    }
+
+    @PutMapping("/product/{id}/restock")
+    public CustomResponse restockProduct(@PathVariable Long id,@RequestParam int quantity){
+        if(quantity>0){
+            String productName = shopcartService.restockProduct(id,quantity);
+            return new CustomResponse(productName+" restocked successfully");
+        }
+        throw new IllegalArgumentException("Quantity must be greater than 0");
+    }
 }
