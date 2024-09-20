@@ -13,10 +13,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -134,8 +132,10 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         String productSql = "SELECT * FROM product";
         String categorySql = "SELECT id, name FROM category WHERE id = ?";
 
+        // Fetching all products
         List<Product> products = jdbcTemplate.query(productSql, this::mapProduct);
 
+        // Fetching associated categories
         for (Product product : products) {
             Category category = jdbcTemplate.queryForObject(categorySql, new Object[]{product.getCategory().getId()}, this::mapCategory);
             product.setCategory(category);
@@ -276,3 +276,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     }
 
 }
+
+
+
+
