@@ -21,13 +21,16 @@ public class ShopcartController {
     }
 
     @PostMapping("category/add")
-    public void insertCategory(@RequestBody CategoryDTO categoryDTO){
-        System.out.println(categoryDTO);
+    public CustomResponse insertCategory(@RequestBody CategoryDTO categoryDTO){
+        System.out.println("entering contoller");
+        String insertedCategoryName = shopcartService.insertCategory(categoryDTO);
+        return new CustomResponse("Successfully Inserted Category "+insertedCategoryName);
     }
 
     @PostMapping("product/add")
     public CustomResponse insertProduct(@RequestBody ProductDTO productDTO){
-        return null;
+        String insertedProductName = shopcartService.insertProduct(productDTO);
+        return new CustomResponse("Successfully Inserted Product"+insertedProductName);
     }
 
     @GetMapping(path = {"category","category/{id}"})
@@ -40,4 +43,36 @@ public class ShopcartController {
             return new CustomResponse("Successfully Fetched", List.of(categoryDetails));
         }
     }
+
+    @GetMapping(path = {"products" ,"products/{id}"})
+    public CustomResponse getProduct(@PathVariable(required = false) Long id){
+        Object result = shopcartService.getProducts(id);
+        if (id != null) {
+            if (result != null) {
+                return new CustomResponse("Product found with ID: " + id, List.of(result));
+            } else {
+                return new CustomResponse("No product found with ID: " + id);
+            }
+        } else {
+            return new CustomResponse("All products retrieved successfully", (List<?>) result);
+        }
+    }
+
+    @DeleteMapping("category/{id}/delete")
+    public CustomResponse deleteCategory(@PathVariable Long id){
+        shopcartService.deleteCategory(id);
+        return new CustomResponse("Successfully Deleted Category");
+    }
+
+    @DeleteMapping("product/{id}/delete")
+    public CustomResponse deleteProduct(@PathVariable Long id){
+        shopcartService.deleteProduct(id);
+        return new CustomResponse("Successfully Deleted Product");
+
+    }
+
+
+
+
+
 }
