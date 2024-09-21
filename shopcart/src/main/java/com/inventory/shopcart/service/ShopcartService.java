@@ -5,6 +5,7 @@ import com.inventory.shopcart.dto.CategoryDetails;
 
 import java.util.List;
 import com.inventory.shopcart.dto.ProductDTO;
+import com.inventory.shopcart.dto.ProductGET;
 
 public interface ShopcartService {
     void deleteProduct(Long id);
@@ -21,4 +22,5 @@ public interface ShopcartService {
 
     List<String> updateCategory(Long id,String name);
     List<CategoryDetails> findAllCategoryDetails();
+    ProductGET updateProduct(Long id, String name, Float price, Integer quantity, Long categoryId);
 }

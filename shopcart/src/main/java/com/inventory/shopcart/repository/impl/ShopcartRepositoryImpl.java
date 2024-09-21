@@ -234,6 +234,18 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     }
 
     @Override
+    public void updateProduct(ProductGET productGET) {
+        String query = "UPDATE product SET name = ?,price = ?,quantity = ?,category_id = ? WHERE id =?";
+        jdbcTemplate.update(
+                query,productGET.getName(),
+                productGET.getPrice(),
+                productGET.getQuantity(),
+                productGET.getCategoryId(),
+                productGET.getId());
+        productCache.replace(productGET.getId(),productGET.getName());
+    }
+
+    @Override
     public ProductGET findProductById(Long id) {
         String query = "SELECT * FROM product WHERE id = ?";
         try {
