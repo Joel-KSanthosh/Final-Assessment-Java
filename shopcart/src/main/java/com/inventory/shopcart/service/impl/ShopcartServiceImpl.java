@@ -102,6 +102,46 @@ public class ShopcartServiceImpl implements ShopcartService {
     }
 
     @Override
+    public ProductGET updateProduct(Long id, String name, Float price, Integer quantity, Long categoryId) {
+        if(shopcartRepository.existsProductWithId(id)){
+            ProductGET productGET = shopcartRepository.findProductById(id);
+            if(name != null){
+                if(productGET.getName().equals(name)){
+                    throw new IllegalArgumentException("Product's current name is also "+ name);
+                }
+                if(shopcartRepository.existsProductWithName(name)){
+                    throw new DuplicateKeyException("Product with "+name+" already exists");
+                }
+                productGET.setName(name);
+            }
+            if(price != null){
+                if(price < 1){
+                    throw new IllegalArgumentException("Enter a valid price!");
+                }
+                productGET.setPrice(price);
+            }
+            if(quantity != null){
+                if(quantity < 0){
+                    throw new IllegalArgumentException("Enter a valid quantity!");
+                }
+                productGET.setQuantity(quantity);
+            }
+            if(categoryId != null){
+                if(productGET.getCategoryId().equals(categoryId)){
+                    throw new IllegalArgumentException("Product currently exists in the same category");
+                }
+                if(!shopcartRepository.existsCategoryById(categoryId)){
+                    throw new NoResultException("Category with given id doesn't exist!");
+                }
+                productGET.setCategoryId(categoryId);
+            }
+            shopcartRepository.updateProduct(productGET);
+            return productGET;
+        }
+        throw new NoResultException("Product with given id doesn't exist!");
+    }
+
+    @Override
     @Transactional
     public void orderProduct(Long productId, Long userId, int quantity) {
         if(shopcartRepository.existsBuyerWithId(userId)){
@@ -124,5 +164,7 @@ public class ShopcartServiceImpl implements ShopcartService {
         }
         throw new NoResultException("Category with given id doesn't exist!");
     }
+
+
 
 }

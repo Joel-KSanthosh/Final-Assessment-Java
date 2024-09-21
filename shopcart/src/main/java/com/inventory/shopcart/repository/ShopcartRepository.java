@@ -35,4 +35,6 @@ public interface ShopcartRepository {
     List<CategoryDetails> findAllCategoryDetails();
     List<String> updateCategory(Long id,String name);
     String restockProduct(Long id,int quantity);
+    void updateProduct(ProductGET productGET);
+
 }

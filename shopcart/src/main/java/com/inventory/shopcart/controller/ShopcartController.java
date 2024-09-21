@@ -1,9 +1,6 @@
 package com.inventory.shopcart.controller;
 
-import com.inventory.shopcart.dto.CategoryDTO;
-import com.inventory.shopcart.dto.CategoryDetails;
-import com.inventory.shopcart.dto.CustomResponse;
-import com.inventory.shopcart.dto.ProductDTO;
+import com.inventory.shopcart.dto.*;
 import com.inventory.shopcart.service.ShopcartService;
 
 import jakarta.validation.Valid;
@@ -94,5 +91,22 @@ public class ShopcartController {
             return new CustomResponse(productName+" restocked successfully");
         }
         throw new IllegalArgumentException("Quantity must be greater than 0");
+    }
+
+    @PutMapping("product/{id}/update")
+    public CustomResponse updateProduct(
+            @PathVariable Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Float price,
+            @RequestParam(required = false) Integer quantity,
+            @RequestParam(required = false,name = "category_id") Long categoryId
+    ){
+        if(name == null && price == null && quantity == null && categoryId == null){
+            throw new IllegalArgumentException("No arguments given for update.");
+        }
+        else {
+            ProductGET product = shopcartService.updateProduct(id,name,price,quantity,categoryId);
+            return new CustomResponse("Successfully Updated product",List.of(product));
+        }
     }
 }
