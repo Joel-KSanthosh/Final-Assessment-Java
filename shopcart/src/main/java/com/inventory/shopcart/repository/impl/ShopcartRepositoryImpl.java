@@ -63,8 +63,8 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
             System.out.println("No data");
         }
 
-        maxCategoryKey = categoryCache.keySet().stream().max(Long::compare).orElse(1L);
-        maxProductKey = productCache.keySet().stream().max(Long::compare).orElse(1L);
+        maxCategoryKey = categoryCache.keySet().stream().max(Long::compare).orElse(0L);
+        maxProductKey = productCache.keySet().stream().max(Long::compare).orElse(0L);
     }
 
     @Override
