@@ -23,4 +23,9 @@ public class AspireController {
         return new CustomResponse("Successfully Fetched Employees",aspireService.getEmployee(id,starts_with));
     }
 
+    @GetMapping("/streams")
+    public CustomResponse getStreams(){
+    return new CustomResponse("Successfully Fetched",aspireService.getStreams());
+    }
+
 }

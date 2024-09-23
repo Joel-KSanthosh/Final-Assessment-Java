@@ -29,4 +29,9 @@ public class AspireServiceImpl implements AspireService {
          }
          return aspireRepository.findAllEmployee();
     }
+
+    @Override
+    public List<String> getStreams() {
+        return aspireRepository.fetchAllStreams();
+    }
 }

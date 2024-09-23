@@ -1,6 +1,7 @@
 package com.company.aspire.repository.impl;
 
 import com.company.aspire.dto.EmployeeGet;
+import com.company.aspire.dto.StreamGet;
 import com.company.aspire.repository.AspireRepository;
 
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -10,8 +11,10 @@ import org.springframework.jdbc.core.RowMapper;
 
 import org.springframework.stereotype.Repository;
 
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -98,7 +101,26 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public List<String> fetchAllStreams() {
-        return List.of();
+        List<String> streams =new ArrayList<>();
+        String query="SELECT name from stream";
+        streams= jdbcTemplate.queryForList(query,String.class);
+        return streams;
+
+    }
+
+    @Override
+    public void updateManagerId(Long id, Long manager_id) {
+        if(existsWithEmployeeId(id)){
+
+        }
+
+    }
+
+    @Override
+    public boolean existsWithEmployeeId(Long id) {
+        String query ="SELECT COUNT(*) FROM employee WHERE ID = ?";
+        Long count=jdbcTemplate.queryForObject(query,Long.class,id);
+        return count!=null && count>0;
     }
 
     @Override
