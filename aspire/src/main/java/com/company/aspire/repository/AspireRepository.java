@@ -7,7 +7,9 @@ import java.util.List;
 public interface AspireRepository {
 
     EmployeeGet findEmployeeById(Long id);
+    EmployeeGet findEmployeeByIdStartingWith(Long id, String word);
 
     List<EmployeeGet> findEmployeeStartsWith(String word);
+    List<EmployeeGet> findAllEmployee();
 
 }
