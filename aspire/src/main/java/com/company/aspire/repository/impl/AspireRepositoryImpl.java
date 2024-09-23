@@ -49,4 +49,9 @@ public class AspireRepositoryImpl implements AspireRepository {
     public List<EmployeeGet> findEmployeeStartsWith(String word) {
         return List.of();
     }
+
+    @Override
+    public List<String> fetchAllStreams() {
+        return List.of();
+    }
 }

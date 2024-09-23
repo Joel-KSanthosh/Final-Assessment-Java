@@ -10,4 +10,6 @@ public interface AspireRepository {
 
     List<EmployeeGet> findEmployeeStartsWith(String word);
 
+    List<String> fetchAllStreams();
+
 }
