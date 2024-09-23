@@ -12,4 +12,8 @@ public interface AspireRepository {
     List<EmployeeGet> findEmployeeStartsWith(String word);
     List<EmployeeGet> findAllEmployee();
 
+    List<String> fetchAllStreams();
+    void updateManagerId(Long id,Long manager_id);
+
+    boolean existsWithEmployeeId(Long id);
 }

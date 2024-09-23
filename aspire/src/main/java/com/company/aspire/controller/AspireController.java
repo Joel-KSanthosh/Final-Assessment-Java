@@ -2,6 +2,7 @@ package com.company.aspire.controller;
 
 import com.company.aspire.dto.CustomResponse;
 import com.company.aspire.service.AspireService;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +21,11 @@ public class AspireController {
             @RequestParam(required = false) String starts_with
             ){
         return new CustomResponse("Successfully Fetched Employees",aspireService.getEmployee(id,starts_with));
+    }
+
+    @GetMapping("/streams")
+    public CustomResponse getStreams(){
+    return new CustomResponse("Successfully Fetched",aspireService.getStreams());
     }
 
 }
