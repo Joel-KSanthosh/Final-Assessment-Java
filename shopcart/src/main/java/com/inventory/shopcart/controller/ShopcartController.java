@@ -75,7 +75,7 @@ public class ShopcartController {
     public CustomResponse orderProduct(
             @PathVariable Long id,
             @RequestParam Long userId,
-            @RequestParam int quantity
+            @RequestParam Long quantity
     ){
         shopcartService.orderProduct(id,userId,quantity);
         return new CustomResponse("Order placed Successfully.");
@@ -88,7 +88,7 @@ public class ShopcartController {
     }
 
     @PutMapping("/product/{id}/restock")
-    public CustomResponse restockProduct(@PathVariable Long id,@RequestParam Long user_id,@RequestParam int quantity){
+    public CustomResponse restockProduct(@PathVariable Long id,@RequestParam Long user_id,@RequestParam Long quantity){
         if(quantity>0){
             String productName = shopcartService.restockProduct(id,user_id , quantity);
             return new CustomResponse(productName+" restocked successfully");

@@ -21,10 +21,10 @@ public class Product {
     private String name;
 
     @Column(name = "price",nullable = false)
-    private float price;
+    private Float price;
 
     @Column(name = "quantity",nullable = false)
-    private long quantity;
+    private Long quantity;
 
     @ManyToOne
     @JoinColumn(name = "category_id",nullable = false)

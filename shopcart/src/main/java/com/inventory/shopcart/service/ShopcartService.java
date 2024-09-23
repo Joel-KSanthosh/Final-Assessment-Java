@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface ShopcartService {
     void deleteProduct(Long id);
-    void orderProduct(Long productId,Long userId,int quantity);
+    void orderProduct(Long productId,Long userId,Long quantity);
     void deleteCategory(Long id);
 
     String insertCategory(CategoryDTO categoryDTO);
     String insertProduct(ProductDTO productDTO);
-    String restockProduct(Long id,Long user_id,int quantity);
+    String restockProduct(Long id,Long user_id,Long quantity);
     String insertBuyer(UserDTO buyer);
     String insertSeller(UserDTO seller);
 

@@ -33,6 +33,9 @@ public class Orders {
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
 
+    @Column(name = "quantity",updatable = false,nullable = false)
+    private Long quantity;
+
     @Column(name = "order_date",updatable = false,nullable = false,columnDefinition = "timestamp default current_timestamp")
     private Date orderDate;
 
