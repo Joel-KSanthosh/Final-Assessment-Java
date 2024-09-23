@@ -44,7 +44,7 @@ public class ShopcartServiceImpl implements ShopcartService {
     }
 
     @Override
-    public String restockProduct(Long id,Long user_id, int quantity) {
+    public String restockProduct(Long id, Long user_id, Long quantity) {
         if(shopcartRepository.existsSellerWithId(user_id)){
             if(shopcartRepository.existsProductWithId(id)){
                 return shopcartRepository.restockProduct(id,quantity);
@@ -169,11 +169,11 @@ public class ShopcartServiceImpl implements ShopcartService {
 
     @Override
     @Transactional
-    public void orderProduct(Long productId, Long userId, int quantity) {
+    public void orderProduct(Long productId, Long userId, Long quantity) {
         if(shopcartRepository.existsBuyerWithId(userId)){
             ProductGET product = shopcartRepository.findProductById(productId);
             shopcartRepository.buyProduct(product,quantity);
-            shopcartRepository.createOrder(productId,userId);
+            shopcartRepository.createOrder(productId,userId,quantity);
         }
         else {
             throw new NoResultException("Buyer with given id doesn't exist!");

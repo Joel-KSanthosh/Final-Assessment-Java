@@ -9,8 +9,8 @@ public interface ShopcartRepository {
 
     void deleteCategory(Long categoryId);
     void deleteProduct(Long productId);
-    void buyProduct(ProductGET product, int quantity);
-    void createOrder(Long productId, Long userId);
+    void buyProduct(ProductGET product, Long quantity);
+    void createOrder(Long productId,Long userId,Long quantity);
 
     boolean existsCategoryHasProductWithId(Long categoryId);
     boolean existsCategoryById(Long id);
@@ -37,7 +37,7 @@ public interface ShopcartRepository {
 
     List<CategoryDetails> findAllCategoryDetails();
     List<String> updateCategory(Long id,String name);
-    String restockProduct(Long id,int quantity);
+    String restockProduct(Long id,Long quantity);
     void updateProduct(ProductGET productGET);
 
 }
