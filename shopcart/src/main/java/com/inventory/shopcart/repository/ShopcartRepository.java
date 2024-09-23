@@ -1,11 +1,8 @@
 package com.inventory.shopcart.repository;
 
-import com.inventory.shopcart.dto.CategoryDTO;
-import com.inventory.shopcart.dto.CategoryDetails;
-import com.inventory.shopcart.dto.ProductDTO;
+import com.inventory.shopcart.dto.*;
 
 import java.util.List;
-import com.inventory.shopcart.dto.ProductGET;
 
 
 public interface ShopcartRepository {
@@ -19,6 +16,7 @@ public interface ShopcartRepository {
     boolean existsCategoryById(Long id);
     boolean existsProductWithId(Long productId);
     boolean existsBuyerWithId(Long id);
+    boolean existsSellerWithId(Long id);
     boolean existsProductWithName(String name);
     boolean existsCategoryWithName(String name);
 
@@ -26,8 +24,13 @@ public interface ShopcartRepository {
     String insertProduct(ProductDTO productDTO);
     String findCategoryNameWithId(Long id);
     String findProductNameWithId(Long id);
-    Object getProductById( Long id);
+    String insertBuyer(UserDTO buyer);
+    String insertSeller(UserDTO seller);
+
+    Object getProductById(Long id);
     Object getAllProducts();
+    Object getProductByIdCategoryId(Long id,Long category_id);
+    Object getProductByCategoryId(Long category_id);
 
     CategoryDetails findCategoryDetailsById(Long id);
     ProductGET findProductById(Long id);

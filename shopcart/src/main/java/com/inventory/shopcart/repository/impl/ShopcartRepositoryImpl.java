@@ -1,15 +1,13 @@
 package com.inventory.shopcart.repository.impl;
 
-import com.inventory.shopcart.dto.CategoryDTO;
-import com.inventory.shopcart.dto.CategoryDetails;
-import com.inventory.shopcart.dto.ProductDTO;
-import com.inventory.shopcart.dto.ProductGET;
+import com.inventory.shopcart.dto.*;
 import com.inventory.shopcart.model.Category;
 import com.inventory.shopcart.model.Product;
 import com.inventory.shopcart.repository.ShopcartRepository;
 
 import jakarta.annotation.PostConstruct;
 
+import jakarta.persistence.NoResultException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -100,6 +98,20 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     }
 
     @Override
+    public String insertBuyer(UserDTO buyer) {
+        String query = "INSERT INTO User(name,role) VALUES(?,'buyer')";
+        jdbcTemplate.update(query,buyer.getName());
+        return buyer.getName();
+    }
+
+    @Override
+    public String insertSeller(UserDTO seller) {
+        String query = "INSERT INTO User(name,role) VALUES(?,'seller')";
+        jdbcTemplate.update(query,seller.getName());
+        return seller.getName();
+    }
+
+    @Override
     public void deleteCategory(Long categoryId) {
         String query="DELETE  FROM Category where id = ?";
         jdbcTemplate.update(query,categoryId);
@@ -117,15 +129,13 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         String productSql = "SELECT * FROM product WHERE id = ?";
         String categorySql = "SELECT id, name FROM category WHERE id = ?";
 
-        Product product = jdbcTemplate.queryForObject(productSql, new Object[]{id}, this::mapProduct);
-
+        Product product = jdbcTemplate.queryForObject(productSql, this::mapProduct,id);
         if (product != null) {
-
-            Category category = jdbcTemplate.queryForObject(categorySql, new Object[]{product.getCategory().getId()}, this::mapCategory);
+            Category category = jdbcTemplate.queryForObject(categorySql, this::mapCategory,product.getCategory().getId());
             product.setCategory(category);
         }
-
         return product;
+
     }
 
 
@@ -134,15 +144,43 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         String productSql = "SELECT * FROM product";
         String categorySql = "SELECT id, name FROM category WHERE id = ?";
 
-        // Fetching all products
         List<Product> products = jdbcTemplate.query(productSql, this::mapProduct);
 
-        // Fetching associated categories
         for (Product product : products) {
-            Category category = jdbcTemplate.queryForObject(categorySql, new Object[]{product.getCategory().getId()}, this::mapCategory);
+            Category category = jdbcTemplate.queryForObject(categorySql, this::mapCategory,product.getCategory().getId());
             product.setCategory(category);
         }
 
+        return products;
+    }
+
+    @Override
+    public Object getProductByIdCategoryId(Long id, Long category_id) {
+        String productSql = "SELECT * FROM product WHERE id = ? AND category_id = ?";
+        String categorySql = "SELECT * FROM category WHERE id = ?";
+        try{
+            Product product = jdbcTemplate.queryForObject(productSql,this::mapProduct,id,category_id);
+            if(product != null){
+                Category category = jdbcTemplate.queryForObject(categorySql,this::mapCategory,category_id);
+                product.setCategory(category);
+            }
+            return product;
+        }
+        catch (EmptyResultDataAccessException ex){
+            throw new EmptyResultDataAccessException("No products found!",1);
+        }
+
+    }
+
+    @Override
+    public Object getProductByCategoryId(Long category_id) {
+        String productSql = "SELECT * FROM product WHERE category_id = ?";
+        String categorySql = "SELECT * FROM category WHERE id = ?";
+        List<Product> products = jdbcTemplate.query(productSql,this::mapProduct,category_id);
+        Category category = jdbcTemplate.queryForObject(categorySql,this::mapCategory,category_id);
+        for(Product product : products){
+            product.setCategory(category);
+        }
         return products;
     }
 
@@ -291,6 +329,14 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         Long count = jdbcTemplate.queryForObject(query, Long.class,id);
         return count != null && count > 0;
     }
+
+    @Override
+    public boolean existsSellerWithId(Long id) {
+        String query = "SELECT COUNT(*) FROM user WHERE id = ? AND role = 'seller'";
+        Long count = jdbcTemplate.queryForObject(query,Long.class,id);
+        return count != null && count>0;
+    }
+
     private Category mapCategory(ResultSet rs, int rowNum) throws SQLException {
         Category category = new Category();
         category.setId(rs.getLong("id"));
