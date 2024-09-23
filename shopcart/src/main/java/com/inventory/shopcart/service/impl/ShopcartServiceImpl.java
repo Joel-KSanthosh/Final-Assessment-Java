@@ -1,9 +1,6 @@
 package com.inventory.shopcart.service.impl;
 
-import com.inventory.shopcart.dto.CategoryDTO;
-import com.inventory.shopcart.dto.CategoryDetails;
-import com.inventory.shopcart.dto.ProductGET;
-import com.inventory.shopcart.dto.ProductDTO;
+import com.inventory.shopcart.dto.*;
 import com.inventory.shopcart.repository.ShopcartRepository;
 
 import com.inventory.shopcart.service.ShopcartService;
@@ -47,18 +44,47 @@ public class ShopcartServiceImpl implements ShopcartService {
     }
 
     @Override
-    public String restockProduct(Long id, int quantity) {
-        if(shopcartRepository.existsProductWithId(id)){
-            return shopcartRepository.restockProduct(id,quantity);
+    public String restockProduct(Long id,Long user_id, int quantity) {
+        if(shopcartRepository.existsSellerWithId(user_id)){
+            if(shopcartRepository.existsProductWithId(id)){
+                return shopcartRepository.restockProduct(id,quantity);
+            }
+            throw new NoResultException("Product with given id doesn't exist!");
         }
-        throw new NoResultException("Product with given id doesn't exist!");
+        throw new NoResultException("Seller with given id doesn't exist!");
     }
 
     @Override
-    public Object getProducts(Long id){
-        if(id!=null){
-           return shopcartRepository.getProductById(id);
-        }else{
+    public String insertBuyer(UserDTO buyer) {
+        return shopcartRepository.insertBuyer(buyer);
+    }
+
+    @Override
+    public String insertSeller(UserDTO seller) {
+        return shopcartRepository.insertSeller(seller);
+    }
+
+    @Override
+    public Object getProducts(Long id, Long category_id){
+        if(id!=null && category_id != null){
+            if(shopcartRepository.existsProductWithId(id)){
+                if(shopcartRepository.existsCategoryById(category_id)){
+                    return List.of(shopcartRepository.getProductByIdCategoryId(id,category_id));
+                }
+                throw new NoResultException("Category with given id doesn't exist!");
+            }
+            throw new NoResultException("Product with given id doesn't exist!");
+        } else if (id != null) {
+            if(shopcartRepository.existsProductWithId(id)) {
+                return List.of(shopcartRepository.getProductById(id));
+            }
+            throw new NoResultException("Product with given id doesn't exist!");
+        } else if (category_id != null) {
+            if(shopcartRepository.existsCategoryById(category_id)){
+                return shopcartRepository.getProductByCategoryId(category_id);
+            }
+            throw new NoResultException("Category with given id doesn't exist!");
+        } else{
             return shopcartRepository.getAllProducts();
         }
 

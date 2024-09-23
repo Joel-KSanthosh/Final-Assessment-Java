@@ -41,18 +41,21 @@ public class ShopcartController {
         }
     }
 
-    @GetMapping(path = {"products" ,"products/{id}"})
-    public CustomResponse getProduct(@PathVariable(required = false) Long id){
-        Object result = shopcartService.getProducts(id);
-        if (id != null) {
-            if (result != null) {
-                return new CustomResponse("Product found with ID: " + id, List.of(result));
-            } else {
-                return new CustomResponse("No product found with ID: " + id);
-            }
-        } else {
-            return new CustomResponse("All products retrieved successfully", (List<?>) result);
-        }
+    @GetMapping(path = {"product" ,"product/{id}"})
+    public CustomResponse getProduct(
+            @PathVariable(required = false) Long id,
+            @RequestParam(required = false) Long category_id
+            ){
+        return new CustomResponse("Successfully Fetched Product",(List<?>) shopcartService.getProducts(id,category_id));
+//        if (id != null) {
+//            if (result != null) {
+//                return new CustomResponse("Product found with ID: " + id, List.of(result));
+//            } else {
+//                return new CustomResponse("No product found with ID: " + id);
+//            }
+//        } else {
+//            return new CustomResponse("All products retrieved successfully", (List<?>) result);
+//        }
     }
 
     @DeleteMapping("category/{id}/delete")
@@ -85,9 +88,9 @@ public class ShopcartController {
     }
 
     @PutMapping("/product/{id}/restock")
-    public CustomResponse restockProduct(@PathVariable Long id,@RequestParam int quantity){
+    public CustomResponse restockProduct(@PathVariable Long id,@RequestParam Long user_id,@RequestParam int quantity){
         if(quantity>0){
-            String productName = shopcartService.restockProduct(id,quantity);
+            String productName = shopcartService.restockProduct(id,user_id , quantity);
             return new CustomResponse(productName+" restocked successfully");
         }
         throw new IllegalArgumentException("Quantity must be greater than 0");
@@ -108,5 +111,17 @@ public class ShopcartController {
             ProductGET product = shopcartService.updateProduct(id,name,price,quantity,categoryId);
             return new CustomResponse("Successfully Updated product",List.of(product));
         }
+    }
+
+    @PostMapping("buyer/add")
+    public CustomResponse insertBuyer(@Valid @RequestBody UserDTO buyer){
+        String user = shopcartService.insertBuyer(buyer);
+        return new CustomResponse("Successfully Inserted Buyer : "+user);
+    }
+
+    @PostMapping("seller/add")
+    public CustomResponse insertSeller(@Valid @RequestBody UserDTO seller){
+        String user = shopcartService.insertSeller(seller);
+        return new CustomResponse("Successfully Inserted Seller : "+user);
     }
 }

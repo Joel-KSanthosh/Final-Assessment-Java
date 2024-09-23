@@ -1,11 +1,8 @@
 package com.inventory.shopcart.service;
 
-import com.inventory.shopcart.dto.CategoryDTO;
-import com.inventory.shopcart.dto.CategoryDetails;
+import com.inventory.shopcart.dto.*;
 
 import java.util.List;
-import com.inventory.shopcart.dto.ProductDTO;
-import com.inventory.shopcart.dto.ProductGET;
 
 public interface ShopcartService {
     void deleteProduct(Long id);
@@ -14,9 +11,11 @@ public interface ShopcartService {
 
     String insertCategory(CategoryDTO categoryDTO);
     String insertProduct(ProductDTO productDTO);
-    String restockProduct(Long id,int quantity);
+    String restockProduct(Long id,Long user_id,int quantity);
+    String insertBuyer(UserDTO buyer);
+    String insertSeller(UserDTO seller);
 
-    Object getProducts(Long id);
+    Object getProducts(Long id, Long category_id);
 
     CategoryDetails findCategoryDetailsById(Long id);
 
