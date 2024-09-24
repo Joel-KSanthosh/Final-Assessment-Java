@@ -4,14 +4,17 @@ import com.company.aspire.dto.EmployeeGet;
 import com.company.aspire.dto.StreamGet;
 import com.company.aspire.repository.AspireRepository;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import org.springframework.data.jdbc.repository.query.AbstractJdbcQuery;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -99,6 +102,27 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     }
 
+    public StreamGet findStreamAndAccountId(Long streamId){
+        String query="SELECT name,account_id from stream WHERE id = ?";
+        try{
+            return jdbcTemplate.queryForObject(query, new RowMapper<StreamGet>() {
+                @Override
+                public StreamGet mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    StreamGet stream =new StreamGet();
+                    stream.setId(streamId);
+                    stream.setAccount_Id(rs.getLong("account_id"));
+                    stream.setName(rs.getString("name"));
+
+                    return stream;
+                }
+            },streamId);
+
+        }catch (EmptyResultDataAccessException ex){
+            throw new EmptyResultDataAccessException("Stream Id doesn't exist "+streamId,1);
+        }
+    }
+
+
     @Override
     public List<String> fetchAllStreams() {
         List<String> streams =new ArrayList<>();
@@ -109,18 +133,61 @@ public class AspireRepositoryImpl implements AspireRepository {
     }
 
     @Override
-    public void updateManagerId(Long id, Long manager_id) {
-        if(existsWithEmployeeId(id)){
+    public void updateManagerId(EmployeeGet manager, Long id) {
+        String query="UPDATE employee SET manager_id = ? ,stream_id = ?,account_id =? WHERE id = ? ";
+        jdbcTemplate.update(query,manager.getId(),manager.getStream(),manager.getAccount(),id);
 
-        }
 
     }
 
     @Override
-    public boolean existsWithEmployeeId(Long id) {
-        String query ="SELECT COUNT(*) FROM employee WHERE ID = ?";
+    public boolean existsManagerWithStreamId(Long streamId) {
+        String query="SELECT COUNT(*) FROM employee WHERE stream_id = ? AND designation = 'manager' ";
+        Long count=jdbcTemplate.queryForObject(query,Long.class,streamId);
+        return count!=null && count>0;
+    }
+
+
+    @Override
+    public boolean existsEmployeeWithId(Long id) {
+        String query ="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'employee' ";
+        Long count = jdbcTemplate.queryForObject(query,Long.class,id);
+        return count!=null && count>0;
+    }
+
+    @Override
+    public boolean existsManagerWithId(Long id) {
+        String query="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'manager' ";
         Long count=jdbcTemplate.queryForObject(query,Long.class,id);
         return count!=null && count>0;
+    }
+
+    @Override
+    public boolean existsStreamWithId(Long id) {
+        String query="SELECT COUNT(*) FROM stream WHERE id = ?";
+        Long count=jdbcTemplate.queryForObject(query,Long.class,id);
+        return count!=null && count>0;
+    }
+
+    @Override
+    public boolean existsMangerWithSubOrdinates(Long manager_id) {
+        String query="SELECT COUNT(*) FROM employee where manager_id = ? ";
+        Long count=jdbcTemplate.queryForObject(query, Long.class,manager_id);
+        return count!=null && count>0;
+    }
+
+
+    @Override
+    public void changeManagerToEmployee(Long id,String designation,EmployeeGet manager) {
+        String query ="UPDATE employee SET manager_id = ?,designation = ? ,stream_id= ?, account_id = ?  WHERE id = ?" ;
+        jdbcTemplate.update(query,manager.getId(),designation,manager.getStream(),manager.getAccount(),id);
+    }
+
+    @Override
+    public void changeEmployeeToManager(Long id,  String designation, StreamGet stream) {
+        String query="UPDATE employee SET stream_id = ? ,designation = ? , account_id = ? ,manager_id = ?  WHERE id = ? ";
+        jdbcTemplate.update(query,stream.getId(),designation,stream.getAccount_Id(),0,id);
+
     }
 
     @Override
