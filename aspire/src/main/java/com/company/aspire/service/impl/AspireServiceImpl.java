@@ -42,7 +42,7 @@ public class AspireServiceImpl implements AspireService {
             if (aspireRepository.existsManagerWithId(manager_id)){
                 if(!aspireRepository.findEmployeeById(id).getManagerId().equals(manager_id)){
                 aspireRepository.updateManagerId(aspireRepository.findEmployeeById(manager_id),id);
-                }
+                 }
                 else{
                     throw new IllegalArgumentException("Given manager is already the current manager for this employee Id "+id);
                 }
