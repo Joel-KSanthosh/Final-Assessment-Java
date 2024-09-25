@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DuplicateKeyException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -75,7 +77,7 @@ public class ShopcartServiceTests {
     }
 
     @Test
-    public void updateProductTest(){
+    public void updateProductWithSameNameTest(){
         when(mockRepository.existsProductWithId(anyLong())).thenReturn(true);
         when(mockRepository.findProductById(anyLong())).thenReturn(product);
 
@@ -83,5 +85,29 @@ public class ShopcartServiceTests {
                 () -> mockService.updateProduct(1L,"Pen",20f,100,1L));
 
         assertTrue(ex.getMessage().contains("Product's current name is also"));
+    }
+
+    @Test
+    public void updateProductWithNameAlreadyExistsTest(){
+        when(mockRepository.existsProductWithId(anyLong())).thenReturn(true);
+        when(mockRepository.findProductById(anyLong())).thenReturn(product);
+        when(mockRepository.existsProductWithName(anyString())).thenReturn(true);
+
+        Exception ex = assertThrows(DuplicateKeyException.class,
+                () -> mockService.updateProduct(1L,"Bag",200f,100,1L));
+
+        assertTrue(ex.getMessage().contains("Product with"));
+    }
+
+    @Test
+    public void updateProductWithNotValidPrice(){
+        when(mockRepository.existsProductWithId(anyLong())).thenReturn(true);
+        when(mockRepository.findProductById(anyLong())).thenReturn(product);
+        when(mockRepository.existsProductWithName(anyString())).thenReturn(false);
+
+        Exception ex = assertThrows(IllegalArgumentException.class,
+                () -> mockService.updateProduct(1L,"Bag",0f,100,1L));
+
+        assertThat(ex.getMessage()).isEqualTo("Enter a valid price!");
     }
 }
