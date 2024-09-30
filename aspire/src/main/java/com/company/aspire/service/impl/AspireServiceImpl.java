@@ -1,6 +1,9 @@
 package com.company.aspire.service.impl;
 
+import com.company.aspire.dto.AccountDTO;
+import com.company.aspire.dto.EmployeeDTO;
 import com.company.aspire.dto.EmployeeGet;
+import com.company.aspire.dto.StreamDTO;
 import com.company.aspire.repository.AspireRepository;
 import com.company.aspire.service.AspireService;
 
@@ -66,7 +69,7 @@ public class AspireServiceImpl implements AspireService {
                       if(!aspireRepository.existsMangerWithSubOrdinates(id)){
                           aspireRepository.changeManagerToEmployee(id,designation,aspireRepository.findEmployeeById(managerId));}
                       else{
-                          throw new IllegalArgumentException("Manager has SubOrdinates");
+                          throw new IllegalArgumentException("Manager has Subordinates");
                       }
                  }else{
                      throw new IllegalArgumentException("Designation should be employee");}
@@ -102,5 +105,47 @@ public class AspireServiceImpl implements AspireService {
         }
     }
 
+    @Override
+    public String insertAccount(AccountDTO account) {
+        aspireRepository.insertAccount(account);
+        return account.getName();
+    }
+
+    @Override
+    public String insertStream(StreamDTO stream){
+        if(aspireRepository.existsAccountWithId(stream.getAccountId())){
+            aspireRepository.insertStream(stream);
+            return stream.getName();
+        }
+        throw new IllegalArgumentException("Account with given id doesn't exist!");
+    }
+
+    @Override
+    public String insertEmployee(EmployeeDTO employee) {
+        if(aspireRepository.existsAccountWithId(employee.getAccountId())){
+            if(aspireRepository.existsStreamWithIdAndAccountId(employee.getStreamId(), employee.getAccountId())){
+                if(employee.isManager()){
+                    employee.setDesignation("Manager");
+                    if(aspireRepository.existsManagerWithStreamId(employee.getStreamId())){
+                        throw new IllegalArgumentException("Manager already exists for stream with id : "+employee.getStreamId());
+                    }
+                    aspireRepository.insertEmployee(employee);
+                    return employee.getName();
+                } else if (employee.isEmployee()) {
+                    employee.setDesignation("Employee");
+                    if(aspireRepository.existsManagerWithIdAndStreamId(employee.getManagerId(), employee.getStreamId())){
+                        aspireRepository.insertEmployee(employee);
+                        return employee.getName();
+                    }
+                    throw new IllegalArgumentException("Manager doesn't exist for stream with Id : "+employee.getStreamId());
+                }
+                else {
+                    throw new IllegalArgumentException("Enter a valid Employee!");
+                }
+            }
+            throw new IllegalArgumentException("Entered Stream doesn't exist in given account!");
+        }
+        throw new IllegalArgumentException("Account with given id doesn't exist!");
+    }
 
 }
