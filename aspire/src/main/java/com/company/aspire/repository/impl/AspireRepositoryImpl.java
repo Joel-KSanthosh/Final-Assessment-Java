@@ -28,23 +28,22 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     Map<Long,EmployeeGet> employeeCache = new HashMap<>();
 
+    private EmployeeGet mapEmployeeGet(ResultSet rs, int rowNum) throws SQLException {
+        EmployeeGet employee = new EmployeeGet();
+        employee.setId(rs.getLong("id"));
+        employee.setName(rs.getString("name"));
+        employee.setDesignation(rs.getString("designation"));
+        employee.setManagerId(rs.getLong("manager_id"));
+        employee.setAccount(rs.getLong("account_id"));
+        employee.setStream(rs.getLong("stream_id"));
+        return employee;
+    }
     @Override
     public EmployeeGet findEmployeeById(Long id) {
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE id = ?";
         try{
-            return jdbcTemplate.queryForObject(query, new RowMapper<EmployeeGet>() {
-                @Override
-                public EmployeeGet mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    EmployeeGet employee = new EmployeeGet();
-                    employee.setId(id);
-                    employee.setName(rs.getString("name"));
-                    employee.setDesignation(rs.getString("designation"));
-                    employee.setManagerId(rs.getLong("manager_id"));
-                    employee.setAccount(rs.getLong("account_id"));
-                    employee.setStream(rs.getLong("stream_id"));
-                    return employee;
-                }
-            },id);
+            return jdbcTemplate.queryForObject(query, this::mapEmployeeGet, id);
+
         }
         catch (EmptyResultDataAccessException ex){
             throw new EmptyResultDataAccessException("Employee with given id doesn't exist!",1);
@@ -56,19 +55,8 @@ public class AspireRepositoryImpl implements AspireRepository {
     public EmployeeGet findEmployeeByIdStartingWith(Long id, String word) {
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE id = ? AND LIKE ?%";
         try {
-            return jdbcTemplate.queryForObject(query, new RowMapper<EmployeeGet>() {
-                @Override
-                public EmployeeGet mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    EmployeeGet employee = new EmployeeGet();
-                    employee.setId(id);
-                    employee.setName(rs.getString("name"));
-                    employee.setDesignation(rs.getString("designation"));
-                    employee.setManagerId(rs.getLong("manager_id"));
-                    employee.setAccount(rs.getLong("account_id"));
-                    employee.setStream(rs.getLong("stream_id"));
-                    return employee;
-                }
-            },id,word);
+            return jdbcTemplate.queryForObject(query,this::mapEmployeeGet, id, word + "%");
+
         }
         catch (EmptyResultDataAccessException ex){
             throw new EmptyResultDataAccessException("Employee with id = "+id+" and starts_with = "+word+" doesn't exist!",1);
@@ -79,19 +67,7 @@ public class AspireRepositoryImpl implements AspireRepository {
     public List<EmployeeGet> findEmployeeStartsWith(String word) {
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE name LIKE ?";
         try {
-            return jdbcTemplate.query(query, new RowMapper<EmployeeGet>() {
-                @Override
-                public EmployeeGet mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    EmployeeGet employee = new EmployeeGet();
-                    employee.setId(rs.getLong("id"));
-                    employee.setName(rs.getString("name"));
-                    employee.setDesignation(rs.getString("designation"));
-                    employee.setManagerId(rs.getLong("manager_id"));
-                    employee.setAccount(rs.getLong("account_id"));
-                    employee.setStream(rs.getLong("stream_id"));
-                    return employee;
-                }
-            },word + "%");
+            return jdbcTemplate.query(query, this::mapEmployeeGet, word + "%");
         }
         catch (EmptyResultDataAccessException ex){
             throw new EmptyResultDataAccessException("Employee whose name starts with "+word+" doesn't exist!",1);
@@ -230,19 +206,7 @@ public class AspireRepositoryImpl implements AspireRepository {
     public List<EmployeeGet> findAllEmployee() {
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee";
         try {
-            return jdbcTemplate.query(query, new RowMapper<EmployeeGet>() {
-                @Override
-                public EmployeeGet mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    EmployeeGet employee = new EmployeeGet();
-                    employee.setId(rs.getLong("id"));
-                    employee.setName(rs.getString("name"));
-                    employee.setDesignation(rs.getString("designation"));
-                    employee.setManagerId(rs.getLong("manager_id"));
-                    employee.setAccount(rs.getLong("account_id"));
-                    employee.setStream(rs.getLong("stream_id"));
-                    return employee;
-                }
-            });
+            return jdbcTemplate.query(query, this::mapEmployeeGet);
         }
         catch (EmptyResultDataAccessException ex){
             throw new EmptyResultDataAccessException("No Employees Found!",1);
