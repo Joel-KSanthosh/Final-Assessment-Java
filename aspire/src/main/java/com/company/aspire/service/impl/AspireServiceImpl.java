@@ -44,17 +44,17 @@ public class AspireServiceImpl implements AspireService {
         if(aspireRepository.existsEmployeeWithId(id)){
             if (aspireRepository.existsManagerWithId(manager_id)){
                 if(!aspireRepository.findEmployeeById(id).getManagerId().equals(manager_id)){
-                aspireRepository.updateManagerId(aspireRepository.findEmployeeById(manager_id),id);
+                    aspireRepository.updateManagerId(aspireRepository.findEmployeeById(manager_id),id);
                  }
                 else{
                     throw new IllegalArgumentException("Given manager is already the current manager for this employee Id "+id);
                 }
             }else{
-                throw new NoResultException("Manager id "+id+" doesn't exist");
+                throw new NoResultException("Manager id "+manager_id+" doesn't exist");
             }
         }
         else{
-             throw new NoResultException("Employee id"+id+" doesn't exist");
+             throw new NoResultException("Employee id "+id+" doesn't exist");
         }
 
 
