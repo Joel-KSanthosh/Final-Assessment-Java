@@ -1,6 +1,9 @@
 package com.company.aspire.service;
 
+import com.company.aspire.dto.AccountDTO;
+import com.company.aspire.dto.EmployeeDTO;
 import com.company.aspire.dto.EmployeeGet;
+import com.company.aspire.dto.StreamDTO;
 
 import java.util.List;
 
@@ -15,5 +18,9 @@ public interface AspireService {
 
     void employeeToManager(Long id, Long streamId, String designation);
 
+    String insertAccount(AccountDTO account);
 
+    String insertStream(StreamDTO stream);
+
+    String insertEmployee(EmployeeDTO employee);
 }

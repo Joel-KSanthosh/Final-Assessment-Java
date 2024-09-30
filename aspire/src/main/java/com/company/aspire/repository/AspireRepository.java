@@ -1,7 +1,6 @@
 package com.company.aspire.repository;
 
-import com.company.aspire.dto.EmployeeGet;
-import com.company.aspire.dto.StreamGet;
+import com.company.aspire.dto.*;
 
 import java.util.List;
 
@@ -23,4 +22,10 @@ public interface AspireRepository {
     boolean existsMangerWithSubOrdinates(Long manager_id);
     void changeManagerToEmployee(Long id,  String designation,EmployeeGet manager);
     void changeEmployeeToManager(Long id,  String designation, StreamGet stream);
+    void insertAccount(AccountDTO account);
+    void insertStream(StreamDTO stream);
+    boolean existsAccountWithId(Long accountId);
+    boolean existsStreamWithIdAndAccountId(Long streamId,Long accountId);
+    void insertEmployee(EmployeeDTO employee);
+    boolean existsManagerWithIdAndStreamId(Long id,Long streamId);
 }

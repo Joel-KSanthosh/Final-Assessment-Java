@@ -1,24 +1,21 @@
 package com.company.aspire.repository.impl;
 
-import com.company.aspire.dto.EmployeeGet;
-import com.company.aspire.dto.StreamGet;
+import com.company.aspire.dto.*;
 import com.company.aspire.repository.AspireRepository;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
-import org.springframework.data.jdbc.repository.query.AbstractJdbcQuery;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class AspireRepositoryImpl implements AspireRepository {
@@ -29,6 +26,7 @@ public class AspireRepositoryImpl implements AspireRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    Map<Long,EmployeeGet> employeeCache = new HashMap<>();
 
     @Override
     public EmployeeGet findEmployeeById(Long id) {
@@ -81,7 +79,6 @@ public class AspireRepositoryImpl implements AspireRepository {
     public List<EmployeeGet> findEmployeeStartsWith(String word) {
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE name LIKE ?";
         try {
-            System.out.println("Executing query: " + query + " with parameter: " + word + "%");
             return jdbcTemplate.query(query, new RowMapper<EmployeeGet>() {
                 @Override
                 public EmployeeGet mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -142,7 +139,7 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public boolean existsManagerWithStreamId(Long streamId) {
-        String query="SELECT COUNT(*) FROM employee WHERE stream_id = ? AND designation = 'manager' ";
+        String query="SELECT COUNT(*) FROM employee WHERE stream_id = ? AND designation = 'Manager' ";
         Long count=jdbcTemplate.queryForObject(query,Long.class,streamId);
         return count!=null && count>0;
     }
@@ -150,14 +147,14 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public boolean existsEmployeeWithId(Long id) {
-        String query ="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'employee' ";
+        String query ="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'Employee' ";
         Long count = jdbcTemplate.queryForObject(query,Long.class,id);
         return count!=null && count>0;
     }
 
     @Override
     public boolean existsManagerWithId(Long id) {
-        String query="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'manager' ";
+        String query="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'Manager' ";
         Long count=jdbcTemplate.queryForObject(query,Long.class,id);
         return count!=null && count>0;
     }
@@ -188,6 +185,45 @@ public class AspireRepositoryImpl implements AspireRepository {
         String query="UPDATE employee SET stream_id = ? ,designation = ? , account_id = ? ,manager_id = ?  WHERE id = ? ";
         jdbcTemplate.update(query,stream.getId(),designation,stream.getAccount_Id(),0,id);
 
+    }
+
+    @Override
+    public void insertAccount(AccountDTO account) {
+        String query = "INSERT INTO Account(name) VALUES(?)";
+        jdbcTemplate.update(query,account.getName());
+    }
+
+    @Override
+    public void insertStream(StreamDTO stream) {
+        String query = "INSERT INTO Stream(name,account_id) VALUES(?,?)";
+        jdbcTemplate.update(query,stream.getName(),stream.getAccountId());
+    }
+
+    @Override
+    public boolean existsAccountWithId(Long accountId) {
+        String query = "SELECT COUNT(*) FROM account WHERE id = ?";
+        Long count = jdbcTemplate.queryForObject(query, Long.class,accountId);
+        return count != null && count>0;
+    }
+
+    @Override
+    public boolean existsStreamWithIdAndAccountId(Long streamId, Long accountId) {
+        String query = "SELECT COUNT(*) FROM stream WHERE id = ? AND account_id = ?";
+        Long count = jdbcTemplate.queryForObject(query,Long.class,streamId,accountId);
+        return count != null && count>0;
+    }
+
+    @Override
+    public void insertEmployee(EmployeeDTO employee) {
+        String query = "INSERT INTO Employee(name,designation,account_id,stream_id,manager_id) VALUES(?,?,?,?,?)";
+        jdbcTemplate.update(query,employee.getName(),employee.getDesignation(),employee.getAccountId(),employee.getStreamId(),employee.getManagerId());
+    }
+
+    @Override
+    public boolean existsManagerWithIdAndStreamId(Long id, Long streamId) {
+        String query = "SELECT COUNT(*) FROM employee where id = ? AND stream_id = ? AND manager_id = 0";
+        Long count = jdbcTemplate.queryForObject(query, Long.class,id,streamId);
+        return count != null && count>0;
     }
 
     @Override

@@ -1,8 +1,12 @@
 package com.company.aspire.controller;
 
+import com.company.aspire.dto.AccountDTO;
 import com.company.aspire.dto.CustomResponse;
+import com.company.aspire.dto.EmployeeDTO;
+import com.company.aspire.dto.StreamDTO;
 import com.company.aspire.service.AspireService;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -49,9 +53,23 @@ public class AspireController {
     public CustomResponse employeeToManager(
             @RequestParam Long id,@RequestParam Long stream_id,@RequestParam String designation){
             aspireService.employeeToManager(id,stream_id,designation);
-            return new CustomResponse("Succesfully Updated");
+            return new CustomResponse("Successfully Updated");
     }
 
+    @PostMapping("/account/add")
+    public CustomResponse insertAccount(@Valid @RequestBody AccountDTO account){
+        return new CustomResponse("Successfully Inserted account : "+aspireService.insertAccount(account));
+    }
+
+    @PostMapping("/stream/add")
+    public CustomResponse insertStream(@Valid @RequestBody StreamDTO stream){
+        return new CustomResponse("Successfully Inserted account : "+aspireService.insertStream(stream));
+    }
+
+    @PostMapping("/employee/add")
+    public CustomResponse insertEmployee(@Valid @RequestBody EmployeeDTO employee){
+        return new CustomResponse("Successfully Inserted employee : "+aspireService.insertEmployee(employee));
+    }
 
 
 
