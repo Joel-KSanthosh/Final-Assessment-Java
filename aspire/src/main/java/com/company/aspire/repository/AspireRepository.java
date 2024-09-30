@@ -2,13 +2,15 @@ package com.company.aspire.repository;
 
 import com.company.aspire.dto.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 public interface AspireRepository {
 
     EmployeeGet findEmployeeById(Long id);
     EmployeeGet findEmployeeByIdStartingWith(Long id, String word);
-
+    EmployeeGet mapEmployeeGet(ResultSet rs, int rowNum) throws SQLException;
     List<EmployeeGet> findEmployeeStartsWith(String word);
     List<EmployeeGet> findAllEmployee();
     StreamGet findStreamAndAccountId(Long streamId);
