@@ -27,8 +27,8 @@ public class AspireRepositoryImpl implements AspireRepository {
     }
 
     Map<Long,EmployeeGet> employeeCache = new HashMap<>();
-    @Override
-    public EmployeeGet mapEmployeeGet(ResultSet rs, int rowNum) throws SQLException {
+
+    private EmployeeGet mapEmployeeGet(ResultSet rs, int rowNum) throws SQLException {
         EmployeeGet employee = new EmployeeGet();
         employee.setId(rs.getLong("id"));
         employee.setName(rs.getString("name"));
