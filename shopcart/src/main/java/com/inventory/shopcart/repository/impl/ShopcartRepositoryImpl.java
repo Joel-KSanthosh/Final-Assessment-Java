@@ -16,14 +16,15 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private Map<Long,String> categoryCache;
-    private Map<Long,String> productCache;
+    private Map<Long,String> categoryCache=new HashMap<>();
+    private Map<Long,ProductGET> productCache=new HashMap<>();
     private Long maxCategoryKey;
     private Long maxProductKey;
 
@@ -31,38 +32,6 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @PostConstruct
-    public void init(){
-        String productNameQuery = "SELECT id,name FROM product";
-        String categoryNameQuery = "SELECT id,name FROM category";
-
-        categoryCache = new HashMap<>();
-        productCache = new HashMap<>();
-
-        try {
-                jdbcTemplate.query(categoryNameQuery, new RowMapper<Void>() {
-                    @Override
-                    public Void mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        categoryCache.put(rs.getLong("id"), rs.getString("name"));
-                        return null;
-                    }
-                });
-
-                jdbcTemplate.query(productNameQuery, new RowMapper<Void>() {
-                    @Override
-                    public Void mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        productCache.put(rs.getLong("id"),rs.getString("name") );
-                        return null;
-                    }
-                });
-        }
-        catch (EmptyResultDataAccessException ex){
-            System.out.println("No data");
-        }
-
-        maxCategoryKey = categoryCache.keySet().stream().max(Long::compare).orElse(0L);
-        maxProductKey = productCache.keySet().stream().max(Long::compare).orElse(0L);
-    }
 
     @Override
     public String insertCategory(CategoryDTO categoryDTO){
@@ -81,8 +50,6 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         jdbcTemplate.update(query,productDTO.getProductName(),
                 productDTO.getPrice(),productDTO.getQuantity(),
                 productDTO.getCategory_Id());
-        maxProductKey += 1;
-        productCache.put(maxProductKey,productDTO.getProductName());
         return productDTO.getProductName();
     }
 
@@ -93,7 +60,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public String findProductNameWithId(Long id) {
-        return productCache.get(id);
+        return productCache.get(id).getName();
     }
 
     @Override
@@ -125,11 +92,15 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public Object getProductById(Long id) {
+        if(productCache.containsKey(id)){
+            return productCache.get(id);
+        }
         String query = "SELECT * FROM product WHERE id = ?";
-       return jdbcTemplate.queryForObject(query, this::mapProductGet,id);
+       ProductGET product=jdbcTemplate.queryForObject(query, this::mapProductGet,id);
+       productCache.put(id,product);
+       return product;
 
     }
-
 
     @Override
     public Object getAllProducts() {
@@ -140,9 +111,16 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public Object getProductByIdCategoryId(Long id, Long category_id) {
-        String query = "SELECT * FROM product WHERE id = ? AND category_id = ?";
+        if(productCache.containsKey(id) && productCache.get(id).getCategoryId().equals(category_id)){
+            System.out.println(productCache);
+            return productCache.get(id);
+        }
+
         try{
-            return jdbcTemplate.queryForObject(query,this::mapProductGet,id,category_id);
+            String query = "SELECT * FROM product WHERE id = ? AND category_id = ?";
+            ProductGET product= jdbcTemplate.queryForObject(query,this::mapProductGet,id,category_id);
+            productCache.put(id,product);
+            return product;
         }
         catch (EmptyResultDataAccessException ex){
             throw new EmptyResultDataAccessException("No products found!",1);
@@ -186,7 +164,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         String query_category = "SELECT name FROM category WHERE id = ?";
         String query_product_list = "SELECT name FROM product WHERE category_id = ?";
 
-        CategoryDetails categoryDetails = jdbcTemplate.queryForObject(query_category, (rs, rowNum) -> {
+        CategoryDetails categoryDetails = jdbcTemplate.queryForObject(query_category,(rs, rowNum) -> {
             CategoryDetails details = new CategoryDetails();
             details.setCategoryId(id);
             details.setCategoryName(rs.getString("name"));
@@ -203,7 +181,10 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public boolean existsCategoryById(Long id) {
-        return categoryCache.containsKey(id);
+        String sql="SELECT COUNT(*) FROM category WHERE id = ? ";
+        Integer count=jdbcTemplate.queryForObject(sql,Integer.class,id);
+        return count!=null && count>0;
+
     }
 
     @Override
@@ -262,7 +243,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
                 productGET.getQuantity(),
                 productGET.getCategoryId(),
                 productGET.getId());
-        productCache.replace(productGET.getId(),productGET.getName());
+        productCache.replace(productGET.getId(),productGET);
     }
 
     @Override
@@ -316,7 +297,10 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     }
 
     public boolean existsProductWithId(Long productId){
-        return productCache.containsKey(productId);
+        String sql="SELECT COUNT(*) FROM product WHERE id = ?";
+        Integer count=jdbcTemplate.queryForObject(sql,Integer.class,productId);
+        return count!=null && count>0;
+
     }
 
     public boolean existsCategoryHasProductWithId(Long categoryId){
