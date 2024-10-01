@@ -3,6 +3,7 @@ package com.company.aspire.repository.impl;
 import com.company.aspire.dto.*;
 import com.company.aspire.repository.AspireRepository;
 
+import jakarta.persistence.NoResultException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,6 +28,8 @@ public class AspireRepositoryImpl implements AspireRepository {
     }
 
     Map<Long,EmployeeGet> employeeCache = new HashMap<>();
+    List<Long> streamCache = new ArrayList<>();
+    List<Long> accountCache = new ArrayList<>();
 
     private EmployeeGet mapEmployeeGet(ResultSet rs, int rowNum) throws SQLException {
         EmployeeGet employee = new EmployeeGet();
@@ -38,12 +41,17 @@ public class AspireRepositoryImpl implements AspireRepository {
         employee.setStream(rs.getLong("stream_id"));
         return employee;
     }
+
     @Override
     public EmployeeGet findEmployeeById(Long id) {
+        if(employeeCache.containsKey(id)){
+            return employeeCache.get(id);
+        }
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE id = ?";
         try{
-            return jdbcTemplate.queryForObject(query, this::mapEmployeeGet, id);
-
+            EmployeeGet employee = jdbcTemplate.queryForObject(query, this::mapEmployeeGet, id);
+            employeeCache.put(id,employee);
+            return employee;
         }
         catch (EmptyResultDataAccessException ex){
             throw new EmptyResultDataAccessException("Employee with given id doesn't exist!",1);
@@ -53,9 +61,17 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public EmployeeGet findEmployeeByIdStartingWith(Long id, String word) {
+        if(employeeCache.containsKey(id)){
+            if(employeeCache.get(id).getName().startsWith(word)){
+                return employeeCache.get(id);
+            }
+            throw new NoResultException("No employees found!");
+        }
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE id = ? AND LIKE ?%";
         try {
-            return jdbcTemplate.queryForObject(query,this::mapEmployeeGet, id, word + "%");
+            EmployeeGet employeeGet = jdbcTemplate.queryForObject(query,this::mapEmployeeGet, id, word + "%");
+            employeeCache.put(id,employeeGet);
+            return employeeGet;
 
         }
         catch (EmptyResultDataAccessException ex){
@@ -123,6 +139,9 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public boolean existsEmployeeWithId(Long id) {
+        if(employeeCache.containsKey(id)){
+            return true;
+        }
         String query ="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'Employee' ";
         Long count = jdbcTemplate.queryForObject(query,Long.class,id);
         return count!=null && count>0;
@@ -130,6 +149,9 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public boolean existsManagerWithId(Long id) {
+        if(employeeCache.containsKey(id)){
+            return employeeCache.get(id).getManagerId() == 0;
+        }
         String query="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'Manager' ";
         Long count=jdbcTemplate.queryForObject(query,Long.class,id);
         return count!=null && count>0;
@@ -197,6 +219,9 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public boolean existsManagerWithIdAndStreamId(Long id, Long streamId) {
+        if(employeeCache.containsKey(id)){
+            return employeeCache.get(id).getManagerId() == 0 && employeeCache.get(id).getStream().equals(streamId);
+        }
         String query = "SELECT COUNT(*) FROM employee where id = ? AND stream_id = ? AND manager_id = 0";
         Long count = jdbcTemplate.queryForObject(query, Long.class,id,streamId);
         return count != null && count>0;
@@ -204,6 +229,7 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public List<EmployeeGet> findAllEmployee() {
+
         String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee";
         try {
             return jdbcTemplate.query(query, this::mapEmployeeGet);
