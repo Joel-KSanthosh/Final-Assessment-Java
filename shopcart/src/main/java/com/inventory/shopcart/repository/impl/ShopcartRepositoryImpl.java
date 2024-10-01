@@ -5,8 +5,6 @@ import com.inventory.shopcart.model.Category;
 import com.inventory.shopcart.model.Product;
 import com.inventory.shopcart.repository.ShopcartRepository;
 
-import jakarta.annotation.PostConstruct;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 public class ShopcartRepositoryImpl implements ShopcartRepository {
@@ -60,7 +57,20 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public String findProductNameWithId(Long id) {
-        return productCache.get(id).getName();
+        if(productCache.containsKey(id)){
+            return productCache.get(id).getName();
+        }
+        try{
+            String query="SELECT * FROM product WHERE id = ?";
+            ProductGET product=jdbcTemplate.queryForObject(query,this::mapProductGet,id);
+            if(product!=null){
+                productCache.put(id,product);
+                return product.getName();
+            }
+            throw new EmptyResultDataAccessException("Product Not Found!",1);
+        } catch (EmptyResultDataAccessException e) {
+            throw new EmptyResultDataAccessException("Product not found!",1);
+        }
     }
 
     @Override
@@ -181,10 +191,13 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public boolean existsCategoryById(Long id) {
-        String sql="SELECT COUNT(*) FROM category WHERE id = ? ";
+        if(categoryCache.containsKey(id)){
+            return true;
+        }
+
+        String sql="SELECT * FROM category WHERE id = ? ";
         Integer count=jdbcTemplate.queryForObject(sql,Integer.class,id);
         return count!=null && count>0;
-
     }
 
     @Override
@@ -297,6 +310,9 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     }
 
     public boolean existsProductWithId(Long productId){
+        if(productCache.containsKey(productId)){
+            return true;
+        }
         String sql="SELECT COUNT(*) FROM product WHERE id = ?";
         Integer count=jdbcTemplate.queryForObject(sql,Integer.class,productId);
         return count!=null && count>0;
@@ -311,12 +327,21 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public boolean existsCategoryWithName(String name){
-        return categoryCache.containsValue(name);
+
+         if(categoryCache.containsValue(name)){
+             return true;
+         }
+         String sql="SELECT COUNT(*) FROM category WHERE name = ?";
+         Integer count=jdbcTemplate.queryForObject(sql,Integer.class,name);
+         return count!=null && count>0;
     }
 
     @Override
     public boolean existsProductWithName(String name){
-        return productCache.containsValue(name);
+        String sql="SELECT COUNT(*) FROM product WHERE name = ?";
+        Integer count=jdbcTemplate.queryForObject(sql,Integer.class,name);
+        return count!=null && count>0;
+
     }
 
 }
