@@ -62,17 +62,16 @@ public class AspireRepositoryImpl implements AspireRepository {
     @Override
     public EmployeeGet findEmployeeByIdStartingWith(Long id, String word) {
         if(employeeCache.containsKey(id)){
-            if(employeeCache.get(id).getName().startsWith(word)){
+            if(employeeCache.get(id).getName().startsWith(word.toUpperCase())){
                 return employeeCache.get(id);
             }
             throw new NoResultException("No employees found!");
         }
-        String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE id = ? AND LIKE ?%";
+        String query = "SELECT id,name,designation,manager_id,account_id,stream_id FROM employee WHERE id = ? AND name LIKE ?";
         try {
             EmployeeGet employeeGet = jdbcTemplate.queryForObject(query,this::mapEmployeeGet, id, word + "%");
             employeeCache.put(id,employeeGet);
             return employeeGet;
-
         }
         catch (EmptyResultDataAccessException ex){
             throw new EmptyResultDataAccessException("Employee with id = "+id+" and starts_with = "+word+" doesn't exist!",1);
@@ -123,15 +122,17 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public void updateManagerId(EmployeeGet manager, Long id) {
-        String query="UPDATE employee SET manager_id = ? ,stream_id = ?,account_id =? WHERE id = ? ";
+        String query="UPDATE employee SET manager_id = ? ,stream_id = ?,account_id =? WHERE id = ?";
         jdbcTemplate.update(query,manager.getId(),manager.getStream(),manager.getAccount(),id);
-
+        employeeCache.get(id).setManagerId(manager.getId());
+        employeeCache.get(id).setAccount(manager.getAccount());
+        employeeCache.get(id).setStream(manager.getStream());
 
     }
 
     @Override
     public boolean existsManagerWithStreamId(Long streamId) {
-        String query="SELECT COUNT(*) FROM employee WHERE stream_id = ? AND designation = 'Manager' ";
+        String query="SELECT COUNT(*) FROM employee WHERE stream_id = ? AND designation = 'manager' ";
         Long count=jdbcTemplate.queryForObject(query,Long.class,streamId);
         return count!=null && count>0;
     }
@@ -140,9 +141,9 @@ public class AspireRepositoryImpl implements AspireRepository {
     @Override
     public boolean existsEmployeeWithId(Long id) {
         if(employeeCache.containsKey(id)){
-            return true;
+            return employeeCache.get(id).getDesignation().equals("employee");
         }
-        String query ="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'Employee' ";
+        String query ="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'employee' ";
         Long count = jdbcTemplate.queryForObject(query,Long.class,id);
         return count!=null && count>0;
     }
@@ -152,7 +153,7 @@ public class AspireRepositoryImpl implements AspireRepository {
         if(employeeCache.containsKey(id)){
             return employeeCache.get(id).getManagerId() == 0;
         }
-        String query="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'Manager' ";
+        String query="SELECT COUNT(*) FROM employee WHERE id = ? AND designation = 'manager' ";
         Long count=jdbcTemplate.queryForObject(query,Long.class,id);
         return count!=null && count>0;
     }

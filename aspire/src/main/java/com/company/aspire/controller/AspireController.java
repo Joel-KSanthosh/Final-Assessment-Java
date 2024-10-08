@@ -38,7 +38,7 @@ public class AspireController {
             @RequestParam Long manager_id
             ){
         aspireService.updateManagerId(id,manager_id);
-        return new CustomResponse("Successfully Updated ");
+        return new CustomResponse("Successfully Updated manager of "+id+" to "+manager_id);
     }
 
     @PutMapping("/manager-to-employee")
