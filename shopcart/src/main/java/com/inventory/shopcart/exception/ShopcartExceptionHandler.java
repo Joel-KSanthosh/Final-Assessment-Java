@@ -11,6 +11,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -89,6 +90,12 @@ public class ShopcartExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public CustomResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException ex){
         return new CustomResponse("Request Body is invalid");
+    }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public CustomResponse handleIllegalArgumentException(IllegalArgumentException ex){
+        return new CustomResponse(ex.getMessage());
     }
 
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)

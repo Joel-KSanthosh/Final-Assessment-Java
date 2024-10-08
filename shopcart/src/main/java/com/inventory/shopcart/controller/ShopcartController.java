@@ -47,15 +47,6 @@ public class ShopcartController {
             @RequestParam(required = false) Long category_id
             ){
         return new CustomResponse("Successfully Fetched Product",(List<?>) shopcartService.getProducts(id,category_id));
-//        if (id != null) {
-//            if (result != null) {
-//                return new CustomResponse("Product found with ID: " + id, List.of(result));
-//            } else {
-//                return new CustomResponse("No product found with ID: " + id);
-//            }
-//        } else {
-//            return new CustomResponse("All products retrieved successfully", (List<?>) result);
-//        }
     }
 
     @DeleteMapping("category/{id}/delete")
@@ -77,8 +68,12 @@ public class ShopcartController {
             @RequestParam Long userId,
             @RequestParam Long quantity
     ){
-        shopcartService.orderProduct(id,userId,quantity);
-        return new CustomResponse("Order placed Successfully.");
+        if(quantity>0) {
+            shopcartService.orderProduct(id, userId, quantity);
+            return new CustomResponse("Order placed Successfully.");
+        }
+        throw new IllegalArgumentException("Quantity must be greater than 0");
+
     }
 
     @PutMapping("category/{id}/update")

@@ -62,7 +62,6 @@ public class AspireRepositoryImpl implements AspireRepository {
     @Override
     public EmployeeGet findEmployeeByIdStartingWith(Long id, String word) {
         if(employeeCache.containsKey(id)){
-            System.out.println(employeeCache.get(id));
             if(employeeCache.get(id).getName().startsWith(word.toUpperCase())){
                 return employeeCache.get(id);
             }
