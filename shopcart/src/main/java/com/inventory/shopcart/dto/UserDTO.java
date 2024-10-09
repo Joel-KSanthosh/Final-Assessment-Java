@@ -1,5 +1,6 @@
 package com.inventory.shopcart.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +8,7 @@ import lombok.Setter;
 @Setter
 public class UserDTO {
 
+    @NotBlank(message = "Name is mandatory!")
     private String name;
 
 }
