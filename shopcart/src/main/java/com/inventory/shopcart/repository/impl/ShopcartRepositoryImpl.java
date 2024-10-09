@@ -22,8 +22,6 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     private Map<Long,String> categoryCache=new HashMap<>();
     private Map<Long,ProductGET> productCache=new HashMap<>();
-    private Long maxCategoryKey;
-    private Long maxProductKey;
 
     public ShopcartRepositoryImpl(JdbcTemplate jdbcTemplate){
         this.jdbcTemplate = jdbcTemplate;
@@ -33,10 +31,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     @Override
     public String insertCategory(CategoryDTO categoryDTO){
         String query = "INSERT INTO Category(name) VALUES(?)";
-
         jdbcTemplate.update(query,categoryDTO.getCategoryName());
-        maxCategoryKey += 1;
-        categoryCache.put(maxCategoryKey,categoryDTO.getCategoryName());
         return categoryDTO.getCategoryName();
     }
 
@@ -52,7 +47,22 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public String findCategoryNameWithId(Long id) {
-        return categoryCache.get(id);
+        if(categoryCache.containsKey(id)){
+            return categoryCache.get(id);
+        }
+        try {
+            String query = "SELECT name FROM category WHERE id = ?";
+            String categoryName = jdbcTemplate.queryForObject(query, String.class, id);
+            if(categoryName!=null){
+                categoryCache.put(id, categoryName);
+                return categoryName;
+            }
+            throw new EmptyResultDataAccessException("Category Not Found!",1);
+        }
+        catch (EmptyResultDataAccessException e) {
+            throw new EmptyResultDataAccessException("Category Not found!",1);
+        }
+
     }
 
     @Override
@@ -69,7 +79,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
             }
             throw new EmptyResultDataAccessException("Product Not Found!",1);
         } catch (EmptyResultDataAccessException e) {
-            throw new EmptyResultDataAccessException("Product not found!",1);
+            throw new EmptyResultDataAccessException("Product Not found!",1);
         }
     }
 
@@ -91,12 +101,14 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
     public void deleteCategory(Long categoryId) {
         String query="DELETE  FROM Category where id = ?";
         jdbcTemplate.update(query,categoryId);
+        categoryCache.remove(categoryId);
     }
 
     @Override
     public void deleteProduct(Long productId) {
         String sql="DELETE FROM Product where id = ?";
         jdbcTemplate.update(sql,productId);
+        productCache.remove(productId);
 
     }
 
@@ -181,12 +193,16 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
             return details;
         }, id);
 
-        List<String> products = jdbcTemplate.queryForList(query_product_list,String.class,id);
 
+        List<String> products = jdbcTemplate.queryForList(query_product_list,String.class,id);
         if (categoryDetails != null) {
             categoryDetails.setProducts(products);
         }
+        
         return categoryDetails;
+
+
+
     }
 
     @Override
@@ -194,8 +210,7 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
         if(categoryCache.containsKey(id)){
             return true;
         }
-
-        String sql="SELECT * FROM category WHERE id = ? ";
+        String sql="SELECT COUNT(*) FROM category WHERE id = ?";
         Integer count=jdbcTemplate.queryForObject(sql,Integer.class,id);
         return count!=null && count>0;
     }
@@ -327,7 +342,6 @@ public class ShopcartRepositoryImpl implements ShopcartRepository {
 
     @Override
     public boolean existsCategoryWithName(String name){
-
          if(categoryCache.containsValue(name)){
              return true;
          }
