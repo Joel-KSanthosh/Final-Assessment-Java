@@ -25,6 +25,8 @@ public interface AspireRepository {
     boolean existsStreamWithIdAndAccountId(Long streamId,Long accountId);
     boolean existsManagerWithIdAndStreamId(Long id,Long streamId);
     boolean existsAccountWithId(Long accountId);
+    boolean existsAccountWithName(String name);
+    boolean existsStreamWithNameAndAccountId(StreamDTO stream);
 
     void updateManagerId(EmployeeGet manager,Long id);
     void changeManagerToEmployee(Long id,  String designation,EmployeeGet manager);

@@ -132,7 +132,7 @@ public class AspireRepositoryImpl implements AspireRepository {
 
     @Override
     public boolean existsManagerWithStreamId(Long streamId) {
-        String query="SELECT COUNT(*) FROM employee WHERE stream_id = ? AND designation = 'manager' ";
+        String query="SELECT COUNT(*) FROM employee WHERE stream_id = ? AND designation = 'manager'";
         Long count=jdbcTemplate.queryForObject(query,Long.class,streamId);
         return count!=null && count>0;
     }
@@ -206,6 +206,21 @@ public class AspireRepositoryImpl implements AspireRepository {
     }
 
     @Override
+    public boolean existsAccountWithName(String name) {
+        String query="SELECT COUNT(*) FROM account WHERE name = ?";
+        Long count=jdbcTemplate.queryForObject(query,Long.class,name);
+        return count!=null && count>0;
+    }
+
+    @Override
+    public boolean existsStreamWithNameAndAccountId(StreamDTO stream) {
+        String query="SELECT COUNT(*) FROM stream WHERE name = ? AND account_id = ?";
+        Long count=jdbcTemplate.queryForObject(query,Long.class,stream.getName(),stream.getAccountId());
+
+        return count!=null && count>0;
+    }
+
+    @Override
     public boolean existsStreamWithIdAndAccountId(Long streamId, Long accountId) {
         String query = "SELECT COUNT(*) FROM stream WHERE id = ? AND account_id = ?";
         Long count = jdbcTemplate.queryForObject(query,Long.class,streamId,accountId);
@@ -223,8 +238,8 @@ public class AspireRepositoryImpl implements AspireRepository {
         if(employeeCache.containsKey(id)){
             return employeeCache.get(id).getManagerId() == 0 && employeeCache.get(id).getStream().equals(streamId);
         }
-        String query = "SELECT COUNT(*) FROM employee where id = ? AND stream_id = ? AND manager_id = 0";
-        Long count = jdbcTemplate.queryForObject(query, Long.class,id,streamId);
+        String query = "SELECT COUNT(*) FROM employee where id = ? AND stream_id = ? AND manager_id = ?";
+        Long count = jdbcTemplate.queryForObject(query, Long.class,id,streamId,0);
         return count != null && count>0;
     }
 
