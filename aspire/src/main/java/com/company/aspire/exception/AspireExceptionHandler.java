@@ -91,6 +91,12 @@ public class AspireExceptionHandler {
         return new CustomResponse("Request Body is invalid");
     }
 
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public CustomResponse handleIllegalArgumentException(IllegalArgumentException ex){
+        return new CustomResponse(ex.getMessage());
+    }
+
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public CustomResponse handleGenericException(Exception ex){
